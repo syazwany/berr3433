@@ -66,7 +66,7 @@ function verifyToken(req, res, next) {
 
 // Start defining your routes here
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.send('./index.js.');
 });
 
 // Logout for user (requires a valid JWT)
