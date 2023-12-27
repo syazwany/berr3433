@@ -72,7 +72,7 @@ app.get('/', (req, res) => {
 // Logout for user (requires a valid JWT)
   /**
     *@swagger
-    */logout:
+    *  /logout:
     post:
     summary: Logout User
     description: Logs out the user and performs necessary operations.
@@ -142,7 +142,7 @@ app.post('/logout', verifyToken, async (req, res) => {
 
   /**
     *@swagger
-    */login:
+    * /login:
     post:
     summary: 'User login'
     description: 'Authenticate a user and generate a JWT token'
@@ -254,7 +254,7 @@ app.post('/login', async (req, res) => {
 // Create a new visitor (requires a valid JWT)
 /**
   *@swagger
-  */visitors:
+  * /visitors:
   post:
   summary: Create a new visitor
   security:
@@ -339,7 +339,7 @@ app.post('/visitors', verifyToken, async (req, res) => {
 // Register a new user
 /**
 *@swagger
-*/register:
+* /register:
 post:
 summary: Register a new user
 description: Endpoint to register a new user.
@@ -434,7 +434,7 @@ app.post('/register', async (req, res) => {
 // Register a new security
 /**
   *@swagger
-  */register-security:
+  * /register-security:
   post:
   summary: Register a new security entity
   requestBody:
@@ -530,7 +530,7 @@ app.post('/register-security', async (req, res) => {
 // View access info for a visitor
    /**
      *@swagger
-     */visitors/{name}/{email}/access:
+     * /visitors/{name}/{email}/access:
      get:
      summary: 'Get Access Information for a Visitor'
      parameters:
@@ -598,7 +598,7 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
 // Retrieve all visitors
     /**
       *@swagger
-      */visitors:
+      * /visitors:
       get:
       summary: Get all visitors
       responses:
@@ -634,7 +634,7 @@ app.get('/visitors', async (req, res) => {
 // update visitor        
  /**
    *@swagger
-   */visitors/{id}:
+   * /visitors/{id}:
    patch:
    summary: Update a visitor's information
    parameters:
@@ -725,7 +725,7 @@ app.patch('/visitors/:id', verifyToken, async (req, res) => {
 // Delete a visitor (requires a valid JWT)
   /**
     *@swagger
-    */visitors/{id}:
+    * /visitors/{id}:
     delete:
     summary: 'Delete a visitor by ID'
     parameters:
