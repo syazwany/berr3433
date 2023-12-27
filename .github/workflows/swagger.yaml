@@ -1,0 +1,484 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Node.js API
+paths:
+  /login:
+    post:
+      summary: Login for user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+        '401':
+          description: Invalid password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: User Authentication API
+basePath: /api
+schemes:
+  - http
+  - https
+paths:
+  /logout:
+    post:
+      summary: Logout for user (requires a valid JWT)
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Successful logout
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Logout successful
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: An error occurred
+securityDefinitions:
+  BearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+
+openapi: 3.0.0
+info:
+  title: Visitor API
+  description: API for managing visitors
+  version: 1.0.0
+paths:
+  /visitors:
+    post:
+      summary: Create a new visitor
+      description: Requires a valid JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Visitor's name
+                  example: John Doe
+                email:
+                  type: string
+                  format: email
+                  description: Visitor's email address
+                  example: john@example.com
+                purpose:
+                  type: string
+                  description: Purpose of the visit
+                  example: Meeting
+              required:
+                - name
+                - email
+                - purpose
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Visitor created successfully
+          content:
+            application/json:
+              example:
+                message: Visitor created successfully
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              example:
+                message: An error occurred
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Register a new user
+ *     description: Endpoint to register a new user.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: user
+ *         description: User object
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             username:
+ *               type: string
+ *             password:
+ *               type: string
+ *             email:
+ *               type: string
+ *             address:
+ *               type: string
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *       409:
+ *         description: User already exists
+ *       500:
+ *         description: An error occurred
+ */
+
+ swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: 'Security API'
+basePath: '/'
+schemes:
+  - 'http'
+  - 'https'
+paths:
+  /register-security:
+    post:
+      summary: Register a new security
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
+              email:
+                type: string
+            example:
+              name: John Doe
+              username: johndoe
+              password: mysecretpassword
+              email: johndoe@example.com
+      responses:
+        201:
+          description: Security registered successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              example:
+                message: Security registered successfully
+        409:
+          description: Security already exists
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              example:
+                message: Security already exists
+        500:
+          description: An error occurred
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              example:
+                message: An error occurred
+
+
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Node.js API
+
+paths:
+  /register-security:
+    post:
+      summary: Register a new security
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: security
+          description: Security information to register
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
+              email:
+                type: string
+      responses:
+        201:
+          description: Security registered successfully
+        409:
+          description: Security already exists
+        500:
+          description: An error occurred
+
+  '/visitors/{name}/{email}/access':
+    get:
+      summary: View access info for a visitor
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: name
+          type: string
+          required: true
+          description: Name of the visitor
+        - in: path
+          name: email
+          type: string
+          required: true
+          description: Email of the visitor
+      responses:
+        200:
+          description: Access information retrieved successfully
+        404:
+          description: Access information not found
+        500:
+          description: An error occurred
+
+openapi: 3.0.0
+info:
+  title: Visitor API
+  version: 1.0.0
+paths:
+  /visitors/{name}/{email}/access:
+    get:
+      summary: View access info for a visitor
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: The name of the visitor
+          schema:
+            type: string
+        - name: email
+          in: path
+          required: true
+          description: The email of the visitor
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example: 
+                name: John Doe
+                email: john.doe@example.com
+                // other properties
+        '404':
+          description: Access information not found
+          content:
+            application/json:
+              example:
+                message: Access information not found
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              example:
+                message: An error occurred
+
+  /visitors:
+    get:
+      summary: Retrieve all visitors
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example: 
+                - 
+                  name: John Doe
+                  email: john.doe@example.com
+                  // other properties
+                - 
+                  name: Jane Doe
+                  email: jane.doe@example.com
+                  // other properties
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              example:
+                message: An error occurred
+
+
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: 'Visitors API'
+basePath: '/'
+paths:
+  /visitors:
+    get:
+      summary: 'Retrieve all visitors'
+      responses:
+        200:
+          description: 'Successful operation'
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/Visitor'
+        500:
+          description: 'Internal Server Error'
+    post:
+      # Add POST endpoint details if needed
+
+  /visitors/{id}:
+    patch:
+      summary: 'Update a visitor'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: 'string'
+        - name: VisitorUpdate
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/VisitorUpdate'
+      responses:
+        200:
+          description: 'Visitor updated successfully'
+        500:
+          description: 'Internal Server Error'
+
+definitions:
+  Visitor:
+    type: 'object'
+    properties:
+      _id:
+        type: 'string'
+      name:
+        type: 'string'
+      email:
+        type: 'string'
+      purpose:
+        type: 'string'
+
+  VisitorUpdate:
+    type: 'object'
+    properties:
+      name:
+        type: 'string'
+      email:
+        type: 'string'
+      purpose:
+        type: 'string'
+
+
+        
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: 'Visitor API'
+paths:
+  /visitors/{id}:
+    delete:
+      summary: 'Delete a visitor by ID'
+      parameters:
+        - name: id
+          in: path
+          description: 'ID of the visitor to be deleted'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 'Successful operation'
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: 'Visitor deleted successfully'
+        '500':
+          description: 'Internal Server Error'
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: 'An error occurred'
+      security:
+        - jwt: []
+securityDefinitions:
+  jwt:
+    type: apiKey
+    name: Authorization
+    in: header
