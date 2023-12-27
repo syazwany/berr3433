@@ -90,26 +90,6 @@ app.post('/logout', verifyToken, async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /login:
- *   post:
- *     description: Use to login
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       '200':
- *         description: A successful response
- */
 app.post('/login', async (req, res) => {
     try {
         const {
