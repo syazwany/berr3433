@@ -1,7 +1,8 @@
+/*
 // Logout for user (requires a valid JWT)
   /**
     *@swagger
-    */logout:
+    * /logout:
     post:
     summary: Logout User
     description: Logs out the user and performs necessary operations.
@@ -53,7 +54,7 @@ securitySchemes:
 // Login for user
   /**
     *@swagger
-    */login:
+    * /login:
     post:
     summary: 'User login'
     description: 'Authenticate a user and generate a JWT token'
@@ -114,7 +115,7 @@ securitySchemes:
 // Create a new visitor (requires a valid JWT)
 /**
   *@swagger
-  */visitors:
+  * /visitors:
     post:
       summary: Create a new visitor
       security:
@@ -173,7 +174,7 @@ components:
 // Register a new user
 /**
   *@swagger
-  */register:
+  * /register:
   post:
   summary: Register a new user
   description: Endpoint to register a new user.
@@ -224,7 +225,7 @@ components:
 // Register a new security
 /**
   *@swagger
-  */register-security:
+  * /register-security:
   post:
   summary: Register a new security entity
   requestBody:
@@ -276,7 +277,7 @@ components:
 // View access info for a visitor
    /**
      *@swagger
-     */visitors/{name}/{email}/access:
+     * /visitors/{name}/{email}/access:
     get:
     summary: 'Get Access Information for a Visitor'
     parameters:
@@ -316,7 +317,7 @@ components:
 // Retrieve all visitors
     /**
       *@swagger
-      */visitors:
+      * /visitors:
     get:
     summary: Get all visitors
     responses:
@@ -339,7 +340,7 @@ components:
 // update visitor        
  /**
    *@swagger
-   */visitors/{id}:
+   * /visitors/{id}:
    patch:
    summary: Update a visitor's information
    parameters:
@@ -398,7 +399,7 @@ components:
  // Delete a visitor (requires a valid JWT)
   /**
     *@swagger
-    */visitors/{id}:
+    * /visitors/{id}:
     delete:
     summary: 'Delete a visitor by ID'
     parameters:
@@ -431,4 +432,4 @@ jwt:
   type: apiKey
   name: Authorization
   in: header
-*/
+*/  
