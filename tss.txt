@@ -1,5 +1,5 @@
 
-    // Login for user
+// Login for user
     /**
      * @swagger
      * /login:
@@ -56,10 +56,10 @@ components:
       type: apiKey
       in: header
       name: Authorization
-     */
+*/
 
 
-         // Logout for user (requires a valid JWT)
+// Logout for user (requires a valid JWT)
     /**
      * @swagger
      * /logout:
@@ -96,7 +96,7 @@ components:
       type: apiKey
       in: header
       name: Authorization
-     */
+*/
 
 
 // Create a new visitor (requires a valid JWT)
@@ -150,7 +150,7 @@ components:
       type: apiKey
       in: header
       name: Authorization
- */
+*/
 
  
 // Register a new user
@@ -214,7 +214,7 @@ components:
       name: Authorization
  */
 
- // Register a new security
+// Register a new security
 /**
  * @swagger
  * /register-security:
@@ -275,7 +275,7 @@ components:
       name: Authorization
  */
      
-  // View access info for a visitor
+// View access info for a visitor
     /**
      * @swagger
      *  '/visitors/{name}/{email}/access':
@@ -324,11 +324,11 @@ components:
       type: apiKey
       in: header
       name: Authorization
-         */
+ */
 
          
  
-        // Retrieve all visitors
+// Retrieve all visitors
         /**
          * @swagger
          * /visitors:
@@ -362,10 +362,9 @@ components:
       type: apiKey
       in: header
       name: Authorization
-         */
+*/
 
-
-         
+// update visitor        
 /**
  * @swagger
  * /visitors/{id}:
@@ -415,9 +414,6 @@ components:
  *           application/json:
  *             example:
  *               message: An error occurred
- */
-/**
- * @swagger
  * components:
  *   securitySchemes:
  *     BearerAuth:
@@ -426,7 +422,7 @@ components:
  *       name: Authorization
  */
 
-   // Delete a visitor (requires a valid JWT)
+// Delete a visitor (requires a valid JWT)
   /**
    * @swagger
    * '/visitors/{id}':
@@ -461,5 +457,5 @@ components:
       type: apiKey
       in: header
       name: Authorization
-   */
+*/
      
