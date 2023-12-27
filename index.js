@@ -4,11 +4,8 @@ const jwt = require('jsonwebtoken');
 const {MongoClient} = require('mongodb');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-//const swaggerSpec = require('./swagger');
-const bodyParser = require('body-parser');
 
 const app = express();
-app.use(bodyParser.json());
 const port = process.env.PORT || 3000;
 
 
@@ -39,7 +36,6 @@ const option = {
     apis: ["./index.js"],
 };
 const swaggerSpec = swaggerJsdoc(option);
-module.exports = swaggerSpec;
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
@@ -72,9 +68,6 @@ function verifyToken(req, res, next) {
 // Start defining your routes here
 app.get('/', (req, res) => {
     res.send('Hello World');
-});
-app.listen(port, () => {
-  console.log(`Swagger UI available at http://localhost:${port}/api-docs`);
 });
 
 // Logout for user (requires a valid JWT)
