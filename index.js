@@ -66,7 +66,7 @@ function verifyToken(req, res, next) {
   const db = new MongoClient(url); // create a new mongodb client
   
 // Define a default route for the root path ("/")
-app.get('/Visitors', (req, res) => {
+app.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to the Visitor Management System API' });
 });
 
