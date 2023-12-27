@@ -1,0 +1,108 @@
+###
+### Register for a new user
+###
+POST http://localhost:3000/register
+Content-Type: application/json
+
+{
+  "username": "wannocomel",
+  "password": "podah1234",
+  "email": "wanno@example.com",
+  "address": "123 Main kampong"
+}
+
+###
+### Register for security
+###
+POST http://localhost:3000/register-security
+Content-Type: application/json
+
+{
+  "name": "adoya",
+  "username": "ado_ya",
+  "password": "secret00",
+  "email": "ado.ya@example.com"
+}
+
+
+
+
+###
+### Login for user
+###
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "username": "wannocomel",
+  "password": "podah1234"
+}
+###
+
+
+
+###
+### Create a New Visitor
+###
+POST http://localhost:3000/visitors
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDliOTA0NDUyYjViOWU0MTk2YWU3ZTgiLCJpYXQiOjE2ODgxNTMyNDN9.xlx0lJ_GVHr4e7LcNjkDU0juHiZzCEcEAPEpVeEfC_w
+
+{
+  "name": "ain",
+  "email": "kuih123@gigi.com",
+  "purpose": "Makan"
+}
+
+
+
+###
+### View access info for a visitor
+###
+GET http://localhost:3000/visitors/ain/kuih123@gigi.com/access
+
+
+
+###
+### Retrieve all visitors
+###
+GET http://localhost:3000/visitors
+
+
+
+###
+### Update a visitor
+###
+PATCH http://localhost:3000/visitors/visitor-id
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE2ODgxNTU0OTJ9.15CV2dXkrIvOB5QIoXFDOTy9sXRBHCMtXPPtINqeESY
+
+{
+  "name": "ain",
+  "email": "kuih123@gigi.com",
+  "purpose": "meeting for new year"
+}
+
+
+
+###
+### Delete a visitor
+###
+DELETE http://localhost:3000/visitors/123
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE2ODgxNTU0OTJ9.15CV2dXkrIvOB5QIoXFDOTy9sXRBHCMtXPPtINqeESY
+
+{
+  "name": "ain",
+  "email": "kuih123@gigi.com",
+  "purpose": "meeting for school"
+}
+
+
+
+###
+### User Logout
+###
+POST http://localhost:3000/logout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE2ODgxNTU0OTJ9.15CV2dXkrIvOB5QIoXFDOTy9sXRBHCMtXPPtINqeESY
