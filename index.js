@@ -25,7 +25,7 @@ const option = {
       version: '1.0.0',
     },
   },
-  apis:["./index.js"],
+  apis:['./index.js'],
 };
 const swaggerSpec = swaggerJsdoc(option);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -69,6 +69,22 @@ function verifyToken(req, res, next) {
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to the Visitor Management System API' });
 });
+
+db.connect()
+  .then(() => {
+    console.log('Connected to MongoDB');
+
+    // Rest of the code related to MongoDB operations
+
+    // Start the server
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
+    // Handle any errors related to MongoDB connection here
+  });
 
 
 
@@ -255,19 +271,3 @@ app.patch('/visitors/:id', verifyToken, async (req, res) => {
     }
   });
   
-
-db.connect()
-  .then(() => {
-    console.log('Connected to MongoDB');
-
-    // Rest of the code related to MongoDB operations
-
-    // Start the server
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    });
-  })
-  .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
-    // Handle any errors related to MongoDB connection here
-  });
