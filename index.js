@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const {MongoClient} = require('mongodb');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerSpec = require('./swagger');
+//const swaggerSpec = require('./swagger');
 const bodyParser = require('body-parser');
 
 const app = express();
@@ -78,6 +78,36 @@ app.listen(port, () => {
 });
 
 // Logout for user (requires a valid JWT)
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *    summary: Logout for user (requires a valid JWT)
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful logout
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               example: Logout successful
+ *       500:
+ *         description: Internal Server Error
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               example: An error occurred
+* securityDefinitions:
+ * BearerAuth:
+ *   type: apiKey
+ *   name: Authorization
+ *   in: header
+ */
 app.post('/logout', verifyToken, async (req, res) => {
     try {
         // Perform any necessary logout operations
@@ -97,6 +127,62 @@ app.post('/logout', verifyToken, async (req, res) => {
 });
 
 // Login for user
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Login for user
+ *       requestBody:
+ *        equired: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *        responses:
+ *          '200':
+ *            description: Successful login
+ *            content:
+ *             application/json:
+ *              schema:
+ *               type: object
+ *               properties:
+ *                message:
+ *                   type: string
+ *                token:
+ *               type: string
+ *       '401':
+ *        description: Invalid password
+ *        content:
+ *           application/json:
+ *            schema:
+ *              type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       '404':
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 app.post('/login', async (req, res) => {
     try {
         const {
@@ -150,6 +236,57 @@ app.post('/login', async (req, res) => {
 });
 
 // Create a new visitor (requires a valid JWT)
+/**
+ * @swagger
+ *  /visitors:
+ *  post:
+ *     summary: Create a new visitor
+ *     description: Requires a valid JWT.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Visitor's name
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Visitor's email address
+ *                 example: john@example.com
+ *               purpose:
+ *                 type: string
+ *                 description: Purpose of the visit
+ *                 example: Meeting
+ *             required:
+ *               - name
+ *               - email
+ *               - purpose
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       '201':
+ *         description: Visitor created successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Visitor created successfully
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ *components:
+ *  securitySchemes:
+ *   BearerAuth:
+ *     type: http
+ *     scheme: bearer
+ */
 app.post('/visitors', verifyToken, async (req, res) => {
     try {
         const {
@@ -255,6 +392,64 @@ app.post('/register', async (req, res) => {
 
 
 // Register a new security
+/**
+ * @swagger
+ * /register-security:
+ *   post:
+ *     summary: Register a new security
+ *     consumes:
+ *       - application/json
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *             username:
+ *               type: string
+ *             password:
+ *               type: string
+ *             email:
+ *               type: string
+ *           example:
+ *             name: John Doe
+ *             username: johndoe
+ *             password: mysecretpassword
+ *             email: johndoe@example.com
+ *     responses:
+ *       201:
+ *         description: Security registered successfully
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *             example:
+ *               message: Security registered successfully
+ *       409:
+ *         description: Security already exists
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *             example:
+ *               message: Security already exists
+ *       500:
+ *         description: An error occurred
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *             example:
+ *               message: An error occurred
+ */
 app.post('/register-security', async (req, res) => {
     try {
         const {
@@ -301,6 +496,70 @@ app.post('/register-security', async (req, res) => {
 
 
 // View access info for a visitor
+/**
+ * @swagger
+ * /visitors/{name}/{email}/access:
+ *   get:
+ *     summary: View access info for a visitor
+ *     parameters:
+ *       - name: name
+ *         in: path
+ *         required: true
+ *         description: The name of the visitor
+ *         schema:
+ *           type: string
+ *       - name: email
+ *         in: path
+ *         required: true
+ *         description: The email of the visitor
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ 8         content:
+ *           application/json:
+ *             example: 
+ *               name: John Doe
+ *               email: john.doe@example.com
+ *               // other properties
+ *       '404':
+ *         description: Access information not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Access information not found
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred*
+ *
+ * /visitors:
+ *  get:
+ *     summary: Retrieve all visitors
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example: 
+ *               - 
+ *                 name: John Doe
+ *                 email: john.doe@example.com
+ *                 // other properties
+ *               - 
+ *                 name: Jane Doe
+ *                 email: jane.doe@example.com
+ *                 // other properties
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */
 app.get('/visitors/:name/:email/access', async (req, res) => {
     try {
         const {
@@ -331,6 +590,65 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
 
 
 // Retrieve all visitors
+/**
+ * @swagger
+ * /visitors:
+ *   get:
+ *     summary: 'Retrieve all visitors'
+ *     responses:
+ *       200:
+ *         description: 'Successful operation'
+ *         schema:
+ *           type: 'array'
+ *           items:
+ *             $ref: '#/definitions/Visitor'
+ *       500:
+ *         description: 'Internal Server Error'
+ *   post:
+ *     # Add POST endpoint details if needed
+ *
+ * /visitors/{id}:
+ *   patch:
+ *     summary: 'Update a visitor'
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         type: 'string'
+ *       - name: VisitorUpdate
+ *        in: body
+ *         required: true
+ *         schema:
+ *           $ref: '#/definitions/VisitorUpdate'
+ *     responses:
+ *       200:
+ *         description: 'Visitor updated successfully'
+ *       500:
+ *         description: 'Internal Server Error
+ *
+ *definitions:
+ *  Visitor:
+ *   type: 'object'
+ *   properties:
+ *     _id:
+ *       type: 'string'
+ *     name:
+ *       type: 'string'
+ *     email:
+ *       type: 'string'
+ *     purpose:
+ *       type: 'string'
+ *
+ * VisitorUpdate:
+ *   type: 'object'
+ *   properties:
+ *     name:
+ *       type: 'string'
+ *     email:
+ *       type: 'string'
+ *     purpose:
+ *       type: 'string'
+ */
 app.get('/visitors', async (req, res) => {
     try {
         // Retrieve all visitors from the "visitors" collection
@@ -345,7 +663,79 @@ app.get('/visitors', async (req, res) => {
     }
 });
  
-// update visitor            
+// update visitor  
+/**
+ * @swagger
+ * /visitors/{id}:
+ *  parameters:
+ *    - name: id
+ *      in: path
+ *      description: ID of the visitor to update
+ *        required: true
+ *       type: string
+ *     - name: Authorization
+ *       in: header
+ *       description: Bearer token for authentication
+ *       required: true
+ *       type: string
+ *   patch:
+ *     summary: Update a visitor
+ *     description: Updates a visitor's information in the "visitors" collection.
+ *     consumes:
+ *       - application/json
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Visitor updated successfully
+ *       400:
+ *         description: Bad request
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Invalid request payload
+ *       401:
+ *         description: Unauthorized
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Unauthorized access
+ *       500:
+ *         description: Internal server error
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: An error occurred
+ *     parameters:
+ *       - in: body
+ *         name: body
+ *         description: Visitor data to update
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: Name of the visitor
+ *             email:
+ *               type: string
+ *               description: Email of the visitor
+ *             purpose:
+ *               type: string
+ *               description: Purpose of the visit
+ */          
 app.patch('/visitors/:id', verifyToken, async (req, res) => {
     try {
         const {
@@ -380,6 +770,42 @@ app.patch('/visitors/:id', verifyToken, async (req, res) => {
 });
 
 // Delete a visitor (requires a valid JWT)
+/**
+ * @swagger
+ * /visitors/{id}:
+ *  delete:
+ *    summary: 'Delete a visitor by ID'
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: 'ID of the visitor to be deleted'
+ *         required: true
+ *         type: string
+ *     responses:
+ *       '200':
+ *         description: 'Successful operation'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'Visitor deleted successfully'
+ *       '500':
+ *         description: 'Internal Server Error'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'An error occurred'
+ *     security:
+ *       - jwt: []
+ * securityDefinitions:
+ * jwt:
+ *   type: apiKey
+ *   name: Authorization
+ *   in: header
+ */
 app.delete('/visitors/:id', verifyToken, async (req, res) => {
     try {
         const {
