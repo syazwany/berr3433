@@ -38,6 +38,7 @@ const option = {
 const swaggerSpec = swaggerJsdoc(option);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+
 // Middleware to verify JWT
 function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -68,7 +69,9 @@ function verifyToken(req, res, next) {
 app.get('/', (req, res) => {
     res.send('Hello World');
 });
-
+app.listen(port, () => {
+  console.log(`Swagger UI available at http://localhost:${port}/api-docs`);
+});
 // Logout for user (requires a valid JWT)
   /**
     *@swagger
