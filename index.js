@@ -251,7 +251,10 @@ app.patch('/visitors/:id', verifyToken, async (req, res) => {
     }
   });
   
-
+// Define a default route for the root path ("/")
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Welcome to the Visitor Management System API' });
+});
 
 db.connect()
   .then(() => {
