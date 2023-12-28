@@ -510,65 +510,50 @@ app.post('/register-security', async (req, res) => {
  * @swagger
  * /visitors/{name}/{email}/access:
  *   get:
- *     summary: View access info for a visitor
+ *     summary: 'Retrieve Visitor Access Information'
+ *     description: 'Endpoint to retrieve access information for a visitor'
+ *     produces:
+ *       - 'application/json'
  *     parameters:
- *       - name: name
- *         in: path
+ *       - in: path
+ *         name: name
+ *         type: string
  *         required: true
- *         description: The name of the visitor
- *         schema:
- *           type: string
- *       - name: email
- *         in: path
+ *         description: 'Visitor name'
+ *       - in: path
+ *         name: email
+ *         type: string
  *         required: true
- *         description: The email of the visitor
+ *         description: 'Visitor email'
+ *     responses:
+ *       200:
+ *         description: 'Access information retrieved successfully'
  *         schema:
- *           type: string
- *     responses:
- *       '200':
- *         description: Successful response
- 8         content:
- *           application/json:
- *             example: 
- *               name: John Doe
- *               email: john.doe@example.com
- *               // other properties
- *       '404':
- *         description: Access information not found
- *         content:
- *           application/json:
- *             example:
- *               message: Access information not found
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred*
- *
- * /visitors:
- *  get:
- *     summary: Retrieve all visitors
- *     responses:
- *       '200':
- *         description: Successful response
- *         content:
- *           application/json:
- *             example: 
- *               - 
- *                 name: John Doe
- *                 email: john.doe@example.com
- *                 // other properties
- *               - 
- *                 name: Jane Doe
- *                 email: jane.doe@example.com
- *                 // other properties
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: 'Visitor name'
+ *             email:
+ *               type: string
+ *               description: 'Visitor email'
+ *             // Add other properties as needed
+ *       404:
+ *         description: 'Access information not found'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'Access information not found'
+ *       500:
+ *         description: 'Internal Server Error'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'An error occurred'
  */
 app.get('/visitors/:name/:email/access', async (req, res) => {
     try {
