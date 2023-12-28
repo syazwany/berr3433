@@ -1,5 +1,6 @@
-###
-### Register for a new user
+
+##
+###Register for a new user
 ###
 POST http://localhost:3000/register
 Content-Type: application/json
@@ -10,6 +11,7 @@ Content-Type: application/json
   "email": "wanno@example.com",
   "address": "123 Main kampong"
 }
+
 
 ###
 ### Register for security
