@@ -769,23 +769,28 @@ app.patch('/visitors/:id', verifyToken, async (req, res) => {
  * @swagger
  * /visitors/{id}:
  *  delete:
- *    summary: 'Delete a visitor by ID'
+ *     summary: 'Delete Visitor'
+ *     description: 'Endpoint to delete a visitor by ID'
+ *     produces:
+ *       - 'application/json'
  *     parameters:
- *       - name: id
- *         in: path
- *         description: 'ID of the visitor to be deleted'
- *         required: true
+ *       - in: path
+ *         name: id
  *         type: string
+ *         required: true
+ *         description: 'Visitor ID'
+ *     security:
+ *       - BearerAuth: []
  *     responses:
- *       '200':
- *         description: 'Successful operation'
+ *       200:
+ *         description: 'Visitor deleted successfully'
  *         schema:
  *           type: object
  *           properties:
  *             message:
  *               type: string
  *               description: 'Visitor deleted successfully'
- *       '500':
+ *       500:
  *         description: 'Internal Server Error'
  *         schema:
  *           type: object
@@ -793,13 +798,11 @@ app.patch('/visitors/:id', verifyToken, async (req, res) => {
  *             message:
  *               type: string
  *               description: 'An error occurred'
- *     security:
- *       - jwt: []
- * securityDefinitions:
- *  jwt:
- *   type: apiKey
- *   name: Authorization
- *   in: header
+ *     securityDefinitions:
+ *       BearerAuth:
+ *         type: apiKey
+ *         name: Authorization
+ *         in: header
  */
 app.delete('/visitors/:id', verifyToken, async (req, res) => {
     try {
