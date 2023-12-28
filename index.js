@@ -508,52 +508,7 @@ app.post('/register-security', async (req, res) => {
 // View access info for a visitor
 /**
  * @swagger
- * /visitors/{name}/{email}/access:
- *   get:
- *     summary: 'Retrieve Visitor Access Information'
- *     description: 'Endpoint to retrieve access information for a visitor'
- *     produces:
- *       - 'application/json'
- *     parameters:
- *       - in: path
- *         name: name
- *         type: string
- *         required: true
- *         description: 'Visitor name'
- *       - in: path
- *         name: email
- *         type: string
- *         required: true
- *         description: 'Visitor email'
- *     responses:
- *       200:
- *         description: 'Access information retrieved successfully'
- *         schema:
- *           type: object
- *           properties:
- *             name:
- *               type: string
- *               description: 'Visitor name'
- *             email:
- *               type: string
- *               description: 'Visitor email'
- *             // Add other properties as needed
- *       404:
- *         description: 'Access information not found'
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: 'Access information not found'
- *       500:
- *         description: 'Internal Server Error'
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: 'An error occurred'
+ *
  */
 app.get('/visitors/:name/:email/access', async (req, res) => {
     try {
@@ -587,27 +542,7 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
 // Retrieve all visitors
 /**
  * @swagger
- * /visitors:
- *   get:
- *     summary: Get all visitors
- *     responses:
- *       '200':
- *         description: Successful response
- *         content:
- *           application/json:
- *             example:
- *               - id: 1
- *                 name: John Doe
- *                 entryTime: '2023-01-01T12:00:00Z'
- *               - id: 2
- *                 name: Jane Doe
- *                 entryTime: '2023-01-01T12:30:00Z'
- *       '500':
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
+ * 
  **/
 app.get('/visitors', async (req, res) => {
     try {
