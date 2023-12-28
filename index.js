@@ -508,7 +508,48 @@ app.post('/register-security', async (req, res) => {
 // View access info for a visitor
 /**
  * @swagger
- *
+ * /visitors/{name}/{email}/access:
+ *   get:
+ *     summary: Get access info for a visitor
+ *     parameters:
+ *       - name: name
+ *         in: path
+ *         required: true
+ *         type: string
+ *         description: The name of the visitor
+ *       - name: email
+ *         in: path
+ *         required: true
+ *         type: string
+ *         format: email
+ *         description: The email of the visitor
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         schema:
+ *           $ref: '#/definitions/Visitor'
+ *       '404':
+ *         description: Access information not found
+ *         schema:
+ *           $ref: '#/definitions/Error'
+ *       '500':
+ *         description: An error occurred
+ *         schema:
+ *           $ref: '#/definitions/Error'
+*definitions:
+ * Visitor:
+ *   type: object
+ *   properties:
+ *     name:
+ *       type: string
+ *     email:
+ *       type: string
+ *     // Add other properties as needed
+ * Error:
+ *   type: object
+ *   properties:
+ *     message:
+ *       type: string
  */
 app.get('/visitors/:name/:email/access', async (req, res) => {
     try {
@@ -542,8 +583,35 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
 // Retrieve all visitors
 /**
  * @swagger
- * 
- **/
+ * /visitors:
+ *   get:
+ *     summary: Retrieve all visitors
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/Visitor'
+ *       '500':
+ *         description: An error occurred
+ *         schema:
+ *           $ref: '#/definitions/Error'
+*definitions:
+ * Visitor:
+ *   type: object
+ *   properties:
+ *     name:
+ *       type: string
+ *     email:
+ *       type: string
+ *     // Add other properties as needed
+ * Error:
+ *   type: object
+ *   properties:
+ *     message:
+ *       type: string
+ */
 app.get('/visitors', async (req, res) => {
     try {
         // Retrieve all visitors from the "visitors" collection
