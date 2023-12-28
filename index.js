@@ -589,61 +589,26 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
  * @swagger
  * /visitors:
  *   get:
- *     summary: 'Retrieve all visitors'
+ *     summary: Get all visitors
  *     responses:
- *       200:
- *         description: 'Successful operation'
- *         schema:
- *           type: 'array'
- *           items:
- *             $ref: '#/definitions/Visitor'
- *       500:
- *         description: 'Internal Server Error'
- *   post:
- *     # Add POST endpoint details if needed
- *
- * /visitors/{id}:
- *   patch:
- *     summary: 'Update a visitor'
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         type: 'string'
- *       - name: VisitorUpdate
- *        in: body
- *         required: true
- *         schema:
- *           $ref: '#/definitions/VisitorUpdate'
- *     responses:
- *       200:
- *         description: 'Visitor updated successfully'
- *       500:
- *         description: 'Internal Server Error
- *
- *definitions:
- *  Visitor:
- *   type: 'object'
- *   properties:
- *     _id:
- *       type: 'string'
- *     name:
- *       type: 'string'
- *     email:
- *       type: 'string'
- *     purpose:
- *       type: 'string'
- *
- * VisitorUpdate:
- *   type: 'object'
- *   properties:
- *     name:
- *       type: 'string'
- *     email:
- *       type: 'string'
- *     purpose:
- *       type: 'string'
- */
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               - id: 1
+ *                 name: John Doe
+ *                 entryTime: '2023-01-01T12:00:00Z'
+ *               - id: 2
+ *                 name: Jane Doe
+ *                 entryTime: '2023-01-01T12:30:00Z'
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ **/
 app.get('/visitors', async (req, res) => {
     try {
         // Retrieve all visitors from the "visitors" collection
