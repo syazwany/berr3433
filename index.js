@@ -584,33 +584,60 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
 /**
  * @swagger
  * /visitors:
- *   get:
+ *  get:
  *     summary: Retrieve all visitors
+ *     description: Retrieves a list of all visitors from the database
  *     responses:
  *       '200':
  *         description: Successful response
- *         schema:
- *           type: array
- *           items:
- *             $ref: '#/definitions/Visitor'
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Visitor'
  *       '500':
- *         description: An error occurred
- *         schema:
- *           $ref: '#/definitions/Error'
-*definitions:
- * Visitor:
- *   type: object
+ *
+ *         
+*description:
+ *
+*Internal
+ *
+*server
+ *
+*error
+*
+*         
+*content:
+*
+*            
+*application/json:
+*
+*              
+*schema:
+*
+*                
+*type:
+* 
+*object
+*
+*                
+*properties:
+*
+*                  
+*message:
+*
+*                    
+*type:
+* 
+*string
+*
+*components:
+ * schemas:
+ *   Visitor:
+ *     type: object
  *   properties:
- *     name:
- *       type: string
- *     email:
- *       type: string
- *     // Add other properties as needed
- * Error:
- *   type: object
- *   properties:
- *     message:
- *       type: string
+ *    # Add properties for visitor data (e.g., name, email, etc.)
  */
 app.get('/visitors', async (req, res) => {
     try {
