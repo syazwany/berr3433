@@ -136,57 +136,62 @@ app.post('/logout', verifyToken, async (req, res) => {
  * @swagger
  * /login:
  *   post:
- *     summary: Login for user
- *       requestBody:
- *        equired: true
- *        content:
- *          application/json:
- *            schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *        responses:
- *          '200':
- *            description: Successful login
- *            content:
- *             application/json:
- *              schema:
- *               type: object
- *               properties:
- *                message:
- *                   type: string
- *                token:
+ *     summary: 'User Login'
+ *     description: 'Endpoint for user login'
+ *     consumes:
+ *       - 'application/json'
+ *     produces:
+ *       - 'application/json'
+ *     parameters:
+ *       - in: body
+ *         name: body
+ *         description: 'User credentials for login'
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             username:
  *               type: string
- *       '401':
- *        description: Invalid password
- *        content:
- *           application/json:
- *            schema:
- *              type: object
- *               properties:
- *                 message:
- *                   type: string
- *       '404':
- *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
+ *               description: 'User username'
+ *             password:
+ *               type: string
+ *               description: 'User password'
+ *     responses:
+ *       200:
+ *         description: 'Login successful'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'Login successful'
+ *             token:
+ *               type: string
+ *               description: 'JSON Web Token (JWT) for authentication'
+ *       401:
+ *         description: 'Invalid password'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'Invalid password'
+ *       404:
+ *         description: 'User not found'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'User not found'
+ *       500:
+ *         description: 'Internal Server Error'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'An error occurred'
  */
 app.post('/login', async (req, res) => {
     try {
