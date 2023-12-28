@@ -95,8 +95,8 @@ app.get('/', (req, res) => {
  *             message:
  *               type: string
  *               example: An error occurred
-* securityDefinitions:
- * BearerAuth:
+ * securityDefinitions:
+ *  BearerAuth:
  *   type: apiKey
  *   name: Authorization
  *   in: header
@@ -794,7 +794,7 @@ app.patch('/visitors/:id', verifyToken, async (req, res) => {
  *     security:
  *       - jwt: []
  * securityDefinitions:
- * jwt:
+ *  jwt:
  *   type: apiKey
  *   name: Authorization
  *   in: header
