@@ -536,15 +536,13 @@ app.post('/register-security', async (req, res) => {
  *         description: An error occurred
  *         schema:
  *           $ref: '#/definitions/Error'
-*definitions:
  * Visitor:
  *   type: object
  *   properties:
  *     name:
  *       type: string
  *     email:
- *       type: string
- *     // Add other properties as needed
+ *       type: string    
  * Error:
  *   type: object
  *   properties:
@@ -585,59 +583,30 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
  * @swagger
  * /visitors:
  *  get:
- *     summary: Retrieve all visitors
- *     description: Retrieves a list of all visitors from the database
+ *    summary: Retrieve all visitors
  *     responses:
  *       '200':
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Visitor'
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/Visitor'
  *       '500':
- *
- *         
-*description:
- *
-*Internal
- *
-*server
- *
-*error
-*
-*         
-*content:
-*
-*            
-*application/json:
-*
-*              
-*schema:
-*
-*                
-*type:
-* 
-*object
-*
-*                
-*properties:
-*
-*                  
-*message:
-*
-*                    
-*type:
-* 
-*string
-*
-*components:
- * schemas:
- *   Visitor:
- *     type: object
+ *         description: An error occurred
+ *         schema:
+ *           $ref: '#/definitions/Error'
+ * Visitor:
+ *   type: object
+ * properties:
+ *     name:
+ *       type: string
+ *     email:
+ *       type: string
+ * Error:
+ *   type: object
  *   properties:
- *    # Add properties for visitor data (e.g., name, email, etc.)
+ *     message:
+ *       type: string
  */
 app.get('/visitors', async (req, res) => {
     try {
