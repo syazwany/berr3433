@@ -662,74 +662,59 @@ app.get('/visitors', async (req, res) => {
 /**
  * @swagger
  * /visitors/{id}:
- *  parameters:
- *    - name: id
- *      in: path
- *      description: ID of the visitor to update
- *        required: true
- *       type: string
- *     - name: Authorization
- *       in: header
- *       description: Bearer token for authentication
- *       required: true
- *       type: string
  *   patch:
- *     summary: Update a visitor
- *     description: Updates a visitor's information in the "visitors" collection.
+ *     summary: 'Update Visitor'
+ *     description: 'Endpoint to update a visitor by ID'
  *     consumes:
- *       - application/json
+ *       - 'application/json'
  *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: Successful operation
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Visitor updated successfully
- *       400:
- *         description: Bad request
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Invalid request payload
- *       401:
- *         description: Unauthorized
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Unauthorized access
- *       500:
- *         description: Internal server error
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: An error occurred
+ *       - 'application/json'
  *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: string
+ *         required: true
+ *         description: 'Visitor ID'
  *       - in: body
  *         name: body
- *         description: Visitor data to update
+ *         description: 'Visitor data to update'
  *         required: true
  *         schema:
  *           type: object
  *           properties:
  *             name:
  *               type: string
- *               description: Name of the visitor
+ *               description: 'Visitor name'
  *             email:
  *               type: string
- *               description: Email of the visitor
+ *               description: 'Visitor email'
  *             purpose:
  *               type: string
- *               description: Purpose of the visit
+ *               description: 'Purpose of the visit'
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 'Visitor updated successfully'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'Visitor updated successfully'
+ *       500:
+ *         description: 'Internal Server Error'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: 'An error occurred'
+ *     securityDefinitions:
+ *       BearerAuth:
+ *         type: apiKey
+ *         name: Authorization
+ 8         in: header
  */          
 app.patch('/visitors/:id', verifyToken, async (req, res) => {
     try {
