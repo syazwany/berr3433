@@ -582,8 +582,8 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
 /**
  * @swagger
  * /visitors:
- *  get:
- *    summary: Retrieve all visitors
+ *   get:
+ *     summary: Retrieve all visitors
  *     responses:
  *       '200':
  *         description: Successful response
