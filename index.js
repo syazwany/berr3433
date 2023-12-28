@@ -596,8 +596,8 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
  *         schema:
  *           $ref: '#/definitions/Error'
  * Visitor:
- *   type: object
- * properties:
+ *  type: object
+ *  properties:
  *     name:
  *       type: string
  *     email:
