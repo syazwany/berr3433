@@ -326,36 +326,50 @@ app.post('/visitors', verifyToken, async (req, res) => {
 // Register a new user
 /**
  * @swagger
- * /register:
+ *  /register:
  *   post:
  *     summary: Register a new user
- *     description: Endpoint to register a new user.
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: user
- *         description: User object
- *         in: body
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             username:
- *               type: string
- *             password:
- *               type: string
- *             email:
- *               type: string
- *             address:
- *               type: string
+ *     requestBody:
+ *       description: User registration details
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *             required:
+ *               - username
+ *               - password
+ *               - email
+ *               - address
  *     responses:
- *       201:
+ *       '201':
  *         description: User registered successfully
- *       409:
- *         description: User already exists
- *       500:
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: User registered successfully
+ *       '409':
+ *         description: User with this email already exists
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: User with this email already exists
+ *       '500':
  *         description: An error occurred
- */
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */ 
 app.post('/register', async (req, res) => {
     try {
         const {
@@ -365,13 +379,14 @@ app.post('/register', async (req, res) => {
             address
         } = req.body;
 
-        // Check if the user already exists
+        // Check if the user already exists based on email
         const existingUser = await db.collection('users').findOne({
-            username
+            email
         });
+
         if (existingUser) {
             res.status(409).json({
-                message: 'User already exists'
+                message: 'User with this email already exists'
             });
             return;
         }
