@@ -136,79 +136,58 @@ app.post('/logout', verifyToken, async (req, res) => {
  * @swagger
  * /login:
  *   post:
- *     summary: 'User Login'
- *     description: 'Endpoint for user login'
- *     consumes:
- *       - 'application/json'
- *     produces:
- *       - 'application/json'
- *     parameters:
- *       - in: body
- *         name: body
- *         description: 'User credentials for login'
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             username:
- *               type: string
- *               description: 'User username'
- *             password:
- *               type: string
- *               description: 'User password'
+ *     summary: Login a user
+ *     requestBody:
+ *       description: User login details
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required:
+ *               - username
+ *               - password
  *     responses:
- *       200:
- *         description: 'Login successful'
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: 'Login successful'
- *             token:
- *               type: string
- *               description: 'JSON Web Token (JWT) for authentication'
- *       401:
- *         description: 'Invalid password'
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: 'Invalid password'
- *       404:
- *         description: 'User not found'
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: 'User not found'
- *       500:
- *         description: 'Internal Server Error'
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: 'An error occurred'
- */
+ *       '200':
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Login successful
+ *               token: <JWT_TOKEN>
+ *       '401':
+ *         description: Invalid password
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Invalid password
+ *       '404':
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: User not found
+ *       '500':
+ *         description: An error occurred during login
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred during login
+*/              
 app.post('/login', async (req, res) => {
     try {
-        const {
-            username,
-            password
-        } = req.body;
+        const { username, password } = req.body;
 
         // Find the user in the "users" collection
-        const user = await db.collection('users').findOne({
-            username
-        });
+        const user = await db.collection('users').findOne({ username });
 
         if (!user) {
-            res.status(404).json({
-                message: 'User not found'
-            });
+            res.status(404).json({ message: 'User not found' });
             return;
         }
 
@@ -216,9 +195,7 @@ app.post('/login', async (req, res) => {
         const isPasswordMatch = await bcrypt.compare(password, user.password);
 
         if (!isPasswordMatch) {
-            res.status(401).json({
-                message: 'Invalid password'
-            });
+            res.status(401).json({ message: 'Invalid password' });
             return;
         }
 
@@ -229,21 +206,15 @@ app.post('/login', async (req, res) => {
         });
 
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({
-            userId: user._id
-        }, 'secretKey');
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'yourSecretKey');
 
-        res.status(200).json({
-            message: 'Login successful',
-            token
-        });
+        res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: 'An error occurred'
-        });
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'An error occurred during login' });
     }
 });
+
 
 // Create a new visitor (requires a valid JWT)
 /**
