@@ -178,7 +178,7 @@ app.post('/logout', verifyToken, async (req, res) => {
  *           application/json:
  *             example:
  *               message: An error occurred during login
-*/              
+ */              
 app.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
