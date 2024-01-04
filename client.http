@@ -1,15 +1,15 @@
-##
-###Register for a new user
+###
+### Register for a new user
+###
 POST http://localhost:3000/register
 Content-Type: application/json
 
 {
-  "username": "wannocomel",
-  "password": "podah1234",
-  "email": "wanno@example.com",
-  "address": "123 Main kampong"
+  "username": "wannocomelnya",
+  "password": "podah12345",
+  "email": "wannonya@example.com",
+  "address": "1234 Main kampong"
 }
-
 
 ###
 ### Register for security
@@ -34,8 +34,8 @@ POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-  "username": "kiki18",
-  "password": "123456"
+  "username": "wannocomelnya",
+  "password": "podah12345"
 }
 ###
 
@@ -99,10 +99,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmM
 }
 
 
-
 ###
-### User Logout
+### Delete a visitor
 ###
 POST http://localhost:3000/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTk2YjdjYzkxNzE5N2M3YzY2MDg4YmYiLCJpYXQiOjE3MDQzNzcyMTZ9.Qta08j9RbAWfNwl7Q0mtRH583dpYwk9C43kDCqxoImQ
+Authorization: Bearer YOUR_TOKEN_HERE
+
+
+
+

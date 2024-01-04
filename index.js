@@ -39,51 +39,34 @@ const swaggerSpec = swaggerJsdoc(option);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
+
+
 // Middleware to verify JWT
 function verifyToken(req, res, next) {
-    console.log('Verifying token...');
     const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Extract the token from the header
 
-    if (!authHeader) {
-        console.log('Unauthorized - Missing token');
-        return res.status(401).json({
-            message: 'Unauthorized - Missing token'
-        });
+    if (!token) {
+        res.status(401).json({ message: 'Unauthorized - Missing token' });
+        return;
     }
 
-    const tokenParts = authHeader.split(' ');
-    if (tokenParts.length !== 2 || tokenParts[0] !== 'Bearer') {
-        console.log('Unauthorized - Invalid token format');
-        return res.status(401).json({
-            message: 'Unauthorized - Invalid token format'
-        });
-    }
+    const secretKey = process.env.JWT_SECRET || 'yourFallbackSecretKey';
 
-    const token = tokenParts[1];
-
-    jwt.verify(token, process.env.JWT_SECRET || 'yourSecretKey', (err, decoded) => {
+    jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
-            console.log('Unauthorized - Invalid token:', err.message);
-            return res.status(403).json({
-                message: 'Unauthorized - Invalid token',
-                error: err.message  // Include the actual error message for debugging
-            });
+            res.status(403).json({ message: 'Unauthorized - Invalid token' });
+            return;
         }
-    
-        console.log('Decoded Token Content:', decoded);
+
         req.userId = decoded.userId;
-        console.log('Token verification successful. User ID:', req.userId);
         next();
     });
-    
-
 }
 
+module.exports = verifyToken;
 
-// Start defining your routes here
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
+  
 
 // Logout for user (requires a valid JWT)
 /**
@@ -103,29 +86,51 @@ app.get('/', (req, res) => {
  *     responses:
  *       200:
  *         description: Logout successful
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Logout successful message
  *       401:
  *         description: Unauthorized
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Unauthorized - Missing or invalid token
  *       403:
  *         description: Forbidden
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Unauthorized - Invalid token
  *       500:
  *         description: An error occurred
- * securityDefinitions:
- *  Bearer:
- *    type: apiKey
- *    name: Authorization
- *    in: header
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Error message*
  */
-app.post('/logout', verifyToken, (req, res) => {
+// Logout route
+app.post('/logout', verifyToken, async (req, res) => {
     try {
         // Perform any necessary logout operations
-        // For example, you might want to invalidate the token on the server-side
-
+        await db.collection('users').insertOne({ action: 'Logout', userId: req.userId });
         res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
+
+
 
 
 
