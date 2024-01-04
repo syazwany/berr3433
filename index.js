@@ -88,14 +88,22 @@ app.get('/', (req, res) => {
 // Logout for user (requires a valid JWT)
 /**
  * @swagger
- *  /logout:
+ * /logout:
  *   post:
  *     summary: User Logout
  *     description: Endpoint to perform user logout operations.
  *     security:
  *       - BearerAuth: []
  *     requestBody:
- *       required: false
+ *       description: User Logout Request Body
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               exampleProperty: 
+ *                 type: string  # Adjust the property type as per your actual request body
+ *             # Add more properties as needed
  *     responses:
  *       '200':
  *         description: Successful logout
@@ -114,12 +122,12 @@ app.get('/', (req, res) => {
  *         content:
  *           application/json:
  *             example:
- *               message: An error occurred*
+ *               message: An error occurred
  *components:
- *  securitySchemes:
- *    BearerAuth:
- *      type: http
- *      scheme: bearer
+ * securitySchemes:
+ *   BearerAuth:
+ *     type: http
+ *     scheme: bearer
  */
 app.post('/logout', verifyToken, async (req, res) => {
     try {
