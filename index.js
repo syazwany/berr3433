@@ -41,9 +41,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware to verify JWT
 function verifyToken(req, res, next) {
+    console.log('Verifying token...');
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader) {
+        console.log('Unauthorized - Missing token');
         return res.status(401).json({
             message: 'Unauthorized - Missing token'
         });
@@ -51,6 +53,7 @@ function verifyToken(req, res, next) {
 
     const tokenParts = authHeader.split(' ');
     if (tokenParts.length !== 2 || tokenParts[0] !== 'Bearer') {
+        console.log('Unauthorized - Invalid token format');
         return res.status(401).json({
             message: 'Unauthorized - Invalid token format'
         });
@@ -60,6 +63,7 @@ function verifyToken(req, res, next) {
 
     jwt.verify(token, process.env.JWT_SECRET || 'yourSecretKey', (err, decoded) => {
         if (err) {
+            console.log('Unauthorized - Invalid token:', err.message);
             return res.status(403).json({
                 message: 'Unauthorized - Invalid token',
                 error: err.message  // Include the actual error message for debugging
@@ -67,6 +71,7 @@ function verifyToken(req, res, next) {
         }
 
         req.userId = decoded.userId;
+        console.log('Token verification successful. User ID:', req.userId);
         next();
     });
 }
