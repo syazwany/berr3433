@@ -40,22 +40,25 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 
-
 // Middleware to verify JWT
 function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1]; // Extract the token from the header
 
     if (!token) {
-        res.status(401).json({ message: 'Unauthorized - Missing token' });
+        res.status(401).json({
+            message: 'Unauthorized'
+        });
         return;
     }
-
-    const secretKey = process.env.JWT_SECRET || 'yourFallbackSecretKey';
+    
+    const secretKey = process.env.JWT_SECRET || 'yourSecretKey'; // Use the same key as in your login function
 
     jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
-            res.status(403).json({ message: 'Unauthorized - Invalid token' });
+            res.status(403).json({
+                message: 'Invalid token'
+            });
             return;
         }
 
@@ -64,9 +67,20 @@ function verifyToken(req, res, next) {
     });
 }
 
-module.exports = verifyToken;
+// Connect to MongoDB
+MongoClient.connect(url)
+    .then((client) => {
+        console.log('Connected to MongoDB');
+        const db = client.db(dbName);
+    })
 
-  
+// Start defining your routes here
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
+
+
+
 
 // Logout for user (requires a valid JWT)
 /**
@@ -128,10 +142,6 @@ app.post('/logout', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
-
-
-
-
 
 
 // Login for user

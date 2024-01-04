@@ -5,10 +5,10 @@ POST http://localhost:3000/register
 Content-Type: application/json
 
 {
-  "username": "wannocomelnya",
-  "password": "podah12345",
-  "email": "wannonya@example.com",
-  "address": "1234 Main kampong"
+  "username": "wannocomel",
+  "password": "podah1234",
+  "email": "wanno@example.com",
+  "address": "123 Main kampong"
 }
 
 ###
@@ -34,8 +34,8 @@ POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-  "username": "wannocomelnya",
-  "password": "podah12345"
+  "username": "momoko",
+  "password": "123456"
 }
 ###
 
@@ -99,13 +99,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmM
 }
 
 
+
 ###
-### Delete a visitor
+### User Logout
 ###
 POST http://localhost:3000/logout
 Content-Type: application/json
-Authorization: Bearer YOUR_TOKEN_HERE
-
-
-
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTk2ZTAxZWZlMDdhODI4MGQwMjJkYjEiLCJpYXQiOjE3MDQzODgzNjZ9.HknGXh1xPYFlivVSVVd9CSqPIrqSMxrDA_l4Cxe0xMg
