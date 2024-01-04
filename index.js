@@ -69,11 +69,14 @@ function verifyToken(req, res, next) {
                 error: err.message  // Include the actual error message for debugging
             });
         }
-
+    
+        console.log('Decoded Token Content:', decoded);
         req.userId = decoded.userId;
         console.log('Token verification successful. User ID:', req.userId);
         next();
     });
+    
+
 }
 
 
