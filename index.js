@@ -263,12 +263,6 @@ app.post('/login', async (req, res) => {
  *           application/json:
  *             example:
  *               message: An error occurred
- * components:
- *  securitySchemes:
- *   bearerAuth:
- *     type: http
- *     scheme: bearer
- *     bearerFormat: JWT
  */
 app.post('/visitors', verifyToken, async (req, res) => {
     try {
@@ -279,11 +273,11 @@ app.post('/visitors', verifyToken, async (req, res) => {
         } = req.body;
 
         // Insert into "visitors" collection
-        await db.collection('visitors').insertOne([{
+        await db.collection('visitors').insertOne({
             name,
             email,
             purpose
-        }]);
+        });
 
         res.status(201).json({
             message: 'Visitor created successfully'
@@ -295,7 +289,6 @@ app.post('/visitors', verifyToken, async (req, res) => {
         });
     }
 });
-
 // Register a new user
 /**
  * @swagger
