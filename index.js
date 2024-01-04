@@ -56,11 +56,14 @@ function verifyToken(req, res, next) {
 
     jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
+            console.error('Token verification error:', err);
             res.status(403).json({
                 message: 'Invalid token'
             });
             return;
         }
+
+        console.log('Decoded token:', decoded);
 
         req.userId = decoded.userId;
         next();
@@ -78,6 +81,7 @@ MongoClient.connect(url)
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
+
 
 
 

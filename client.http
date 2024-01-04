@@ -29,7 +29,7 @@ Content-Type: application/json
 
 ###
 ### Login for user
-###
+### 
 POST http://localhost:3000/login
 Content-Type: application/json
 
@@ -105,4 +105,4 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmM
 ###
 POST http://localhost:3000/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTk2ZTAxZWZlMDdhODI4MGQwMjJkYjEiLCJpYXQiOjE3MDQzODgzNjZ9.HknGXh1xPYFlivVSVVd9CSqPIrqSMxrDA_l4Cxe0xMg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTk2ZTAxZWZlMDdhODI4MGQwMjJkYjEiLCJpYXQiOjE3MDQzODk1MTB9.LooIEi6dK0RuvhdR4GWtbluG7t10hPhzl2-QwvsUxGM
