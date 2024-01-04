@@ -90,52 +90,49 @@ app.get('/', (req, res) => {
  * @swagger
  * /logout:
  *   post:
- *     summary: User Logout
- *     description: Endpoint to perform user logout operations.
- *     security:
- *       - BearerAuth: []
+ *     summary: Logout user
+ *     description: Endpoint to log out a user.
+ *     tags:
+ *       - Authentication
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         description: Bearer token for authentication
+ *         required: true
+ *         type: string
  *     responses:
- *       '200':
- *         description: Successful logout
- *         content:
- *           application/json:
- *             example:
- *               message: Logout successful
- *       '401':
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Missing or invalid token
- *       '500':
- *         description: Internal server error
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- *components:
- *  securitySchemes:
- *    BearerAuth:
- *      type: http
- *      scheme: bearer
+ *       200:
+ *         description: Logout successful
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Logout successful message
+ *       500:
+ *         description: An error occurred
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Error message
+ * securityDefinitions:
+ *  Bearer:
+ *    type: apiKey
+ *    name: Authorization
+ *    in: header
  */
-app.post('/logout', verifyToken, async (req, res) => {
+ app.post('/logout', verifyToken, async (req, res) => {
     try {
-        // Perform any necessary logout operations
-        await db.collection('users').insertOne({
-            action: 'Logout',
-            userId: req.userId
-        });
-        res.status(200).json({
-            message: 'Logout successful'
-        });
+      // Perform any necessary logout operations
+      await db.collection('users').insertOne({ action: 'Logout', userId: req.userId });
+      res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: 'An error occurred'
-        });
+      console.error(error);
+      res.status(500).json({ message: 'An error occurred' });
     }
-});
+  });
 
 // Login for user
 /**
