@@ -115,7 +115,7 @@ app.get('/', (req, res) => {
  *           application/json:
  *             example:
  *               message: An error occurred*
- *components:
+*components:
  *  securitySchemes:
  *    BearerAuth:
  *      type: http
