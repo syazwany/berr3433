@@ -239,53 +239,62 @@ app.post('/login', async (req, res) => {
 /**
  * @swagger
  *  /visitors:
- *  post:
+ *   post:
  *     summary: Create a new visitor
- *     description: Requires a valid JWT.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Visitor's name
- *                 example: John Doe
- *               email:
- *                 type: string
- *                 format: email
- *                 description: Visitor's email address
- *                 example: john@example.com
- *               purpose:
- *                 type: string
- *                 description: Purpose of the visit
- *                 example: Meeting
- *             required:
- *               - name
- *               - email
- *               - purpose
- *     security:
- *       - BearerAuth: []
+ *     description: Endpoint to create a new visitor.
+ *     tags:
+ *       - Visitors
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         description: Bearer token for authentication
+ *         required: true
+ *         type: string
+ *       - name: name
+ *         in: formData
+ *         description: Visitor's name
+ *         required: true
+ *         type: string
+ *       - name: email
+ *         in: formData
+ *         description: Visitor's email
+ *         required: true
+ *         type: string
+ *       - name: purpose
+ *         in: formData
+ *         description: Purpose of the visit
+ *         required: true
+ *         type: string
  *     responses:
- *       '201':
+ *       201:
  *         description: Visitor created successfully
- *         content:
- *           application/json:
- *             example:
- *               message: Visitor created successfully
- *       '500':
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Visitor created successfully
+ *       401:
+ *         description: Unauthorized
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Unauthorized - Missing or invalid token
+ *       500:
  *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- *components:
- *  securitySchemes:
- *   BearerAuth:
- *     type: http
- *     scheme: bearer
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Error message
+ * securityDefinitions:
+ *  Bearer:
+ *    type: apiKey
+ *    name: Authorization
+ *    in: header
  */
 app.post('/visitors', verifyToken, async (req, res) => {
     try {
