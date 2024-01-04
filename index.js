@@ -79,9 +79,6 @@ app.get('/', (req, res) => {
 });
 
 
-
-
-
 // Logout for user (requires a valid JWT)
 /**
  * @swagger
@@ -414,59 +411,30 @@ app.post('/register', async (req, res) => {
  * @swagger
  * /register-security:
  *   post:
- *     summary: Register a new security
- *     consumes:
- *       - application/json
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: body
- *         in: body
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             name:
- *               type: string
- *             username:
- *               type: string
- *             password:
- *               type: string
- *             email:
- *               type: string
- *           example:
- *             name: John Doe
- *             username: johndoe
- *             password: mysecretpassword
- *             email: johndoe@example.com
+ *     summary: Register a new security entity
+ *     description: Register a new security entity with the provided information.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               email:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Security registered successfully
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *             example:
- *               message: Security registered successfully
  *       409:
  *         description: Security already exists
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *             example:
- *               message: Security already exists
  *       500:
- *         description: An error occurred
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *             example:
- *               message: An error occurred
+ *         description: An error occurred during registration
  */
 app.post('/register-security', async (req, res) => {
     try {
@@ -481,36 +449,39 @@ app.post('/register-security', async (req, res) => {
         const existingSecurity = await db.collection('security').findOne({
             username
         });
+
         if (existingSecurity) {
-            res.status(409).json({
+            return res.status(409).json({
                 message: 'Security already exists'
             });
-            return;
         }
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insert the security into the "security" collection
-        const result = await db
-            .collection('security')
-            .insertOne({
-                name,
-                username,
-                password: hashedPassword,
-                email
-            });
-
-        res.status(201).json({
-            message: 'Security registered successfully'
+        const result = await db.collection('security').insertOne({
+            name,
+            username,
+            password: hashedPassword,
+            email
         });
+
+        if (result.insertedCount === 1) {
+            return res.status(201).json({
+                message: 'Security registered successfully'
+            });
+        } else {
+            throw new Error('Failed to insert security into the database');
+        }
     } catch (error) {
-        console.error(error);
+        console.error('Error in /register-security:', error);
         res.status(500).json({
-            message: 'An error occurred'
+            message: 'An error occurred during registration'
         });
     }
 });
+
 
 
 // View access info for a visitor
