@@ -103,36 +103,12 @@ app.get('/', (req, res) => {
  *     responses:
  *       200:
  *         description: Logout successful
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Logout successful message
  *       401:
  *         description: Unauthorized
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Unauthorized - Missing or invalid token
  *       403:
  *         description: Forbidden
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Unauthorized - Invalid token
  *       500:
  *         description: An error occurred
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Error message
  * securityDefinitions:
  *  Bearer:
  *    type: apiKey
