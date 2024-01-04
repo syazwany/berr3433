@@ -80,7 +80,6 @@ function verifyToken(req, res, next) {
 }
 
 
-
 // Start defining your routes here
 app.get('/', (req, res) => {
     res.send('Hello World');
@@ -90,44 +89,37 @@ app.get('/', (req, res) => {
 /**
  * @swagger
  * /logout:
- *  post:
+ *   post:
  *     summary: User Logout
  *     description: Endpoint to perform user logout operations.
- *     consumes:
- *       - application/json
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: Authorization
- *         in: header
- *         description: Bearer token for authentication
- *         required: true
- *         type: string
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: false
  *     responses:
- *       200:
+ *       '200':
  *         description: Successful logout
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Logout successful
- *       401:
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Logout successful
+ *       '401':
  *         description: Unauthorized
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Unauthorized access
- *       500:
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Missing or invalid token
+ *       '500':
  *         description: Internal server error
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred*
+ *components:
+ *  securitySchemes:
+ *    BearerAuth:
+ *      type: http
+ *      scheme: bearer
  */
 app.post('/logout', verifyToken, async (req, res) => {
     try {
