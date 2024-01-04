@@ -409,7 +409,7 @@ app.post('/register', async (req, res) => {
 // Register a new security
 /**
  * @swagger
- * /register-security:
+ *  /register-security:
  *   post:
  *     summary: Register a new security
  *     description: Register a new security entity with the provided information.
@@ -431,14 +431,22 @@ app.post('/register', async (req, res) => {
  *     responses:
  *       '201':
  *         description: Security registered successfully
- *       '409':
- *         description: Security already exists
- *       '500':
- *         description: An error occurred during registration
  *         content:
  *           application/json:
  *             example:
- *               message: An error occurred during registration
+ *               message: Security registered successfully
+ *       '409':
+ *         description: Security already exists
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Security already exists
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
  */
 app.post('/register-security', async (req, res) => {
     try {
@@ -453,37 +461,33 @@ app.post('/register-security', async (req, res) => {
         const existingSecurity = await db.collection('security').findOne({
             username
         });
-
         if (existingSecurity) {
-            return res.status(409).json({
+            res.status(409).json({
                 message: 'Security already exists'
             });
+            return;
         }
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insert the security into the "security" collection
-        const result = await db.collection('security').insertOne({
-            name,
-            username,
-            password: hashedPassword,
-            email
-        });
-
-        if (result.insertedCount === 1) {
-            return res.status(201).json({
-                message: 'Security registered successfully'
+        const result = await db
+            .collection('security')
+            .insertOne({
+                name,
+                username,
+                password: hashedPassword,
+                email
             });
-        } else {
-            throw new Error('Failed to insert security into the database');
-        }
-    } catch (error) {
-        console.error('Error in /register-security:', error);
 
-        // Return a more specific error message
+        res.status(201).json({
+            message: 'Security registered successfully'
+        });
+    } catch (error) {
+        console.error(error);
         res.status(500).json({
-            message: `An error occurred during registration: ${error.message}`
+            message: 'An error occurred'
         });
     }
 });
