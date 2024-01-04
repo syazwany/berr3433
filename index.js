@@ -264,11 +264,11 @@ app.post('/login', async (req, res) => {
  *             example:
  *               message: An error occurred
  * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
+ *  securitySchemes:
+ *   bearerAuth:
+ *     type: http
+ *     scheme: bearer
+ *     bearerFormat: JWT
  */
 app.post('/visitors', verifyToken, async (req, res) => {
     try {
@@ -279,7 +279,7 @@ app.post('/visitors', verifyToken, async (req, res) => {
         } = req.body;
 
         // Insert into "visitors" collection
-        await db.collection('visitors').insertMany([{
+        await db.collection('visitors').insertOne([{
             name,
             email,
             purpose
