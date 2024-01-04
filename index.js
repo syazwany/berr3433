@@ -233,6 +233,8 @@ app.post('/login', async (req, res) => {
  *   post:
  *     summary: Create a new visitor
  *     description: Create a new visitor with the provided information.
+ *     tags:
+ *       - Visitors
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -262,11 +264,11 @@ app.post('/login', async (req, res) => {
  *             example:
  *               message: An error occurred
  * components:
- *  securitySchemes:
- *    bearerAuth:
- *      type: http
- *      scheme: bearer
- *      bearerFormat: JWT
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 app.post('/visitors', verifyToken, async (req, res) => {
     try {
