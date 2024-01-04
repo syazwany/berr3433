@@ -115,16 +115,19 @@ app.get('/', (req, res) => {
  *    name: Authorization
  *    in: header
  */
- app.post('/logout', verifyToken, async (req, res) => {
+app.post('/logout', verifyToken, (req, res) => {
     try {
-      // Perform any necessary logout operations
-      await db.collection('users').insertOne({ action: 'Logout', userId: req.userId });
-      res.status(200).json({ message: 'Logout successful' });
+        // Perform any necessary logout operations
+        // For example, you might want to invalidate the token on the server-side
+
+        res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'An error occurred' });
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
     }
-  });
+});
+
+
 
 // Login for user
 /**

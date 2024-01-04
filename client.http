@@ -34,8 +34,8 @@ POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-  "username": "wannocomel",
-  "password": "podah1234"
+  "username": "kiki18",
+  "password": "123456"
 }
 ###
 
@@ -105,4 +105,4 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmM
 ###
 POST http://localhost:3000/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE3MDQzNzY3MDR9.l3auWPnJmIAubSKb5zjRyI2GwciDoFehmOTt7-4kJ5g
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTk2YjdjYzkxNzE5N2M3YzY2MDg4YmYiLCJpYXQiOjE3MDQzNzcyMTZ9.Qta08j9RbAWfNwl7Q0mtRH583dpYwk9C43kDCqxoImQ
