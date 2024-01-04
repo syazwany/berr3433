@@ -229,63 +229,38 @@ app.post('/login', async (req, res) => {
 // Create a new visitor (requires a valid JWT)
 /**
  * @swagger
- *  /visitors:
+ * /visitors:
  *   post:
  *     summary: Create a new visitor
- *     description: Endpoint to create a new visitor.
- *     tags:
- *       - Visitors
- *     parameters:
- *       - name: Authorization
- *         in: header
- *         description: Bearer token for authentication
- *         required: true
- *         type: string
- *       - name: name
- *         in: formData
- *         description: Visitor's name
- *         required: true
- *         type: string
- *       - name: email
- *         in: formData
- *         description: Visitor's email
- *         required: true
- *         type: string
- *       - name: purpose
- *         in: formData
- *         description: Purpose of the visit
- *         required: true
- *         type: string
+ *     description: Create a new visitor with the provided information.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               purpose:
+ *                 type: string
  *     responses:
- *       201:
+ *       '201':
  *         description: Visitor created successfully
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Visitor created successfully
- *       401:
- *         description: Unauthorized
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Unauthorized - Missing or invalid token
- *       500:
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Visitor created successfully
+ *       '500':
  *         description: An error occurred
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Error message
- * securityDefinitions:
- *  Bearer:
- *    type: apiKey
- *    name: Authorization
- *    in: header
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
  */
 app.post('/visitors', verifyToken, async (req, res) => {
     try {
@@ -318,7 +293,7 @@ app.post('/visitors', verifyToken, async (req, res) => {
  * @swagger
  *  /register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new user 
  *     requestBody:
  *       description: User registration details
  *       required: true
