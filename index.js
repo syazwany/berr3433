@@ -44,11 +44,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1]; // Extract the token from the header
-
+    console.log('Received Token:', token);
     if (!token) {
-        res.status(401).json({
-            message: 'Unauthorized'
-        });
+        res.status(401).json({ message: 'Unauthorized'});
         return;
     }
     
@@ -57,9 +55,7 @@ function verifyToken(req, res, next) {
     jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
             console.error('Token verification error:', err);
-            res.status(403).json({
-                message: 'Invalid token'
-            });
+            res.status(403).json({message: 'Invalid token'});
             return;
         }
 
@@ -224,7 +220,7 @@ app.post('/login', async (req, res) => {
 
         // Generate a JSON Web Token (JWT)
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'yourSecretKey');
-
+        console.log('Generated Token:', token);
         res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
         console.error('Login error:', error);
