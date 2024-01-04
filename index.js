@@ -411,7 +411,7 @@ app.post('/register', async (req, res) => {
  * @swagger
  * /register-security:
  *   post:
- *     summary: Register a new security entity
+ *     summary: Register a new security
  *     description: Register a new security entity with the provided information.
  *     requestBody:
  *       required: true
@@ -429,12 +429,16 @@ app.post('/register', async (req, res) => {
  *               email:
  *                 type: string
  *     responses:
- *       201:
+ *       '201':
  *         description: Security registered successfully
- *       409:
+ *       '409':
  *         description: Security already exists
- *       500:
+ *       '500':
  *         description: An error occurred during registration
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred during registration
  */
 app.post('/register-security', async (req, res) => {
     try {
@@ -476,8 +480,10 @@ app.post('/register-security', async (req, res) => {
         }
     } catch (error) {
         console.error('Error in /register-security:', error);
+
+        // Return a more specific error message
         res.status(500).json({
-            message: 'An error occurred during registration'
+            message: `An error occurred during registration: ${error.message}`
         });
     }
 });
