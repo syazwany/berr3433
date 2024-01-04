@@ -687,41 +687,39 @@ app.patch('/visitors/:id', verifyToken, async (req, res) => {
 /**
  * @swagger
  * /visitors/{id}:
- *  delete:
- *     summary: 'Delete Visitor'
- *     description: 'Endpoint to delete a visitor by ID'
- *     produces:
- *       - 'application/json'
- *     parameters:
- *       - in: path
- *         name: id
- *         type: string
- *         required: true
- *         description: 'Visitor ID'
+ *   delete:
+ *     summary: Delete a visitor by ID
+ *     description: Delete a visitor from the "visitors" collection based on the provided ID.
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID of the visitor to be deleted
+ *         required: true
+ *         schema:
+ *           type: string
+ *     tags:
+ *       - Visitors
  *     responses:
- *       200:
- *         description: 'Visitor deleted successfully'
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: 'Visitor deleted successfully'
- *       500:
- *         description: 'Internal Server Error'
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: 'An error occurred'
- *     securityDefinitions:
- *       BearerAuth:
- *         type: apiKey
- *         name: Authorization
- *         in: header
+ *       '200':
+ *         description: Visitor deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Visitor deleted successfully
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ * components:
+ *  securitySchemes:
+ *   bearerAuth:
+ *     type: http
+ *     scheme: bearer
+ *     bearerFormat: JWT
  */
 app.delete('/visitors/:id', verifyToken, async (req, res) => {
     try {
