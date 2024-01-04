@@ -88,7 +88,7 @@ app.get('/', (req, res) => {
 // Logout for user (requires a valid JWT)
 /**
  * @swagger
- * /logout:
+ *  /logout:
  *   post:
  *     summary: User Logout
  *     description: Endpoint to perform user logout operations.
@@ -115,7 +115,7 @@ app.get('/', (req, res) => {
  *           application/json:
  *             example:
  *               message: An error occurred*
-*components:
+ *components:
  *  securitySchemes:
  *    BearerAuth:
  *      type: http
