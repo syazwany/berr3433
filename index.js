@@ -89,7 +89,7 @@ app.get('/', (req, res) => {
 /**
  * @swagger
  * /logout:
- *  post:
+ *   post:
  *     summary: User Logout
  *     description: Endpoint to perform user logout operations.
  *     security:
@@ -112,12 +112,12 @@ app.get('/', (req, res) => {
  *         content:
  *           application/json:
  *             example:
- *               message: An error occurred*
+ *               message: An error occurred
  *components:
  *  securitySchemes:
- *   BearerAuth:
- *     type: http
- *     scheme: bearer 
+ *    BearerAuth:
+ *      type: http
+ *      scheme: bearer
  */
 app.post('/logout', verifyToken, async (req, res) => {
     try {
