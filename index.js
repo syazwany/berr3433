@@ -82,53 +82,40 @@ app.get('/', (req, res) => {
 // Logout for user (requires a valid JWT)
 /**
  * @swagger
- * /logout:
+ *  /logout:
  *   post:
  *     summary: Logout user
  *     description: Endpoint to log out a user.
  *     tags:
  *       - Authentication
- *     parameters:
- *       - name: Authorization
- *         in: header
- *         description: Bearer token for authentication
- *         required: true
- *         type: string
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Logout successful
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Logout successful message
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Logout successful
  *       401:
  *         description: Unauthorized
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Unauthorized - Missing or invalid token
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Missing or invalid token
  *       403:
  *         description: Forbidden
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Unauthorized - Invalid token
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Invalid token
  *       500:
  *         description: An error occurred
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *               description: Error message*
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
  */
-// Logout route
 app.post('/logout', verifyToken, async (req, res) => {
     try {
         // Perform any necessary logout operations
