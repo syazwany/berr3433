@@ -82,45 +82,57 @@ app.get('/', (req, res) => {
 // Logout for user (requires a valid JWT)
 /**
  * @swagger
- *  /logout:
+ *   /logout:
  *   post:
  *     summary: Logout user
  *     description: Endpoint to log out a user.
  *     tags:
  *       - Authentication
- *     security:
- *       - bearerAuth: []
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         description: Bearer token for authentication
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         description: Logout successful
- *         content:
- *           application/json:
- *             example:
- *               message: Logout successful
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Logout successful message
  *       401:
  *         description: Unauthorized
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Missing or invalid token
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Unauthorized - Missing or invalid token
  *       403:
  *         description: Forbidden
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Invalid token
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Unauthorized - Invalid token
  *       500:
  *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               description: Error message*
  */
 app.post('/logout', verifyToken, async (req, res) => {
     try {
         // Perform any necessary logout operations
-        console.log('Received Token:', token);
         await db.collection('users').insertOne({ action: 'Logout', userId: req.userId });
+        console.log('Received Token:', token);
         res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
         console.error(error);
