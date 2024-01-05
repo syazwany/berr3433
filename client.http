@@ -90,7 +90,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmM
 ###
 DELETE http://localhost:3000/visitors/123
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE3MDQ0MTgxOTV9.JeVXK9SR60C5lZn_BzYlPyggni6qpmKSVHiceaKTQhg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE3MDQ0MjEyMDF9.y7uPayske7KsNSCQjlKM2A3PJbJWrZCqUzBXBhHpo84
 
 {
   "name": "ain",
@@ -105,4 +105,4 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmM
 ###
 POST http://localhost:3000/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE3MDQ0MTk4MTR9.pl4RDSCGoTgM7n-cJaYO2o7EaK5aNeEf1xF_E-p2QE8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE3MDQ0MjEyMDF9.y7uPayske7KsNSCQjlKM2A3PJbJWrZCqUzBXBhHpo84
