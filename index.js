@@ -52,7 +52,7 @@ function verifyToken(req, res, next) {
     
     //const secretKey = process.env.secretKey || token; // Use the same key as in your login function
 
-    jwt.verify(token, 'secretKey', (err, decoded) => {
+    jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
         if (err) {
             console.error('Token verification error:', err);
             res.status(403).json({message: 'Invalid token'});
@@ -132,7 +132,6 @@ app.post('/logout', verifyToken, async (req, res) => {
     try {
         // Perform any necessary logout operations
         await db.collection('users').insertOne({ action: 'Logout', userId: req.userId });
-        console.log('Received Token:', token);
         res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
         console.error(error);
@@ -246,10 +245,18 @@ app.post('/login', async (req, res) => {
  *             properties:
  *               name:
  *                 type: string
+ *                 description: Name of the visitor
  *               email:
  *                 type: string
+ *                 format: email
+ *                 description: Email of the visitor
  *               purpose:
  *                 type: string
+ *                 description: Purpose of the visit
+ *             required:
+ *               - name
+ *               - email
+ *               - purpose
  *     responses:
  *       '201':
  *         description: Visitor created successfully
@@ -263,8 +270,13 @@ app.post('/login', async (req, res) => {
  *           application/json:
  *             example:
  *               message: An error occurred
- *       security:
+ *     security:
  *       - bearerAuth: []
+ * components:
+ *  securitySchemes:
+ *   bearerAuth:
+ *     type: http
+ *     scheme: bearer
  */
 app.post('/visitors', verifyToken, async (req, res) => {
     try {
