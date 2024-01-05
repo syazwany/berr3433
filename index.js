@@ -52,7 +52,7 @@ function verifyToken(req, res, next) {
     
     //const secretKey = process.env.secretKey || token; // Use the same key as in your login function
 
-    jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+    jwt.verify(token, 'secretKey', (err, decoded) => {
         if (err) {
             console.error('Token verification error:', err);
             res.status(403).json({message: 'Invalid token'});
@@ -138,6 +138,7 @@ app.post('/logout', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
 
 
 // Login for user
