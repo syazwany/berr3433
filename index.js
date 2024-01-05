@@ -50,7 +50,7 @@ function verifyToken(req, res, next) {
         return;
     }
     
-    //const secretKey = process.env.JWT_SECRET || 'yourSecretKey'; // Use the same key as in your login function
+    //const secretKey = process.env.secretKey || token; // Use the same key as in your login function
 
     jwt.verify(token, 'secretKey', (err, decoded) => {
         if (err) {
@@ -59,7 +59,7 @@ function verifyToken(req, res, next) {
             return;
         }
 
-       // console.log('Decoded token:', decoded);
+        //console.log('Decoded token:', decoded);
 
         req.userId = decoded.userId;
         next();
@@ -218,7 +218,7 @@ app.post('/login', async (req, res) => {
         });
 
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'yourSecretKey');
+        const token = jwt.sign({ userId: user._id }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(200).json({ message: 'Login successful', token });
     } catch (error) {

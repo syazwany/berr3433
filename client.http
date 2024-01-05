@@ -34,8 +34,8 @@ POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-  "username": "momoko",
-  "password": "123456"
+  "username": "wannocomel",
+  "password": "podah1234"
 }
 ###
 
@@ -46,7 +46,7 @@ Content-Type: application/json
 ###
 POST http://localhost:3000/visitors
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDliOTA0NDUyYjViOWU0MTk2YWU3ZTgiLCJpYXQiOjE2ODgxNTMyNDN9.xlx0lJ_GVHr4e7LcNjkDU0juHiZzCEcEAPEpVeEfC_w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE3MDQ0MTgzMzR9.FoVCXAN_z8N4-hdlwin0nQo80-wnh368DbkNhuIzm-w
 
 {
   "name": "ain",
@@ -90,7 +90,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmM
 ###
 DELETE http://localhost:3000/visitors/123
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE2ODgxNTU0OTJ9.15CV2dXkrIvOB5QIoXFDOTy9sXRBHCMtXPPtINqeESY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE3MDQ0MTgxOTV9.JeVXK9SR60C5lZn_BzYlPyggni6qpmKSVHiceaKTQhg
 
 {
   "name": "ain",
@@ -105,4 +105,4 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmM
 ###
 POST http://localhost:3000/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTk2ZTAxZWZlMDdhODI4MGQwMjJkYjEiLCJpYXQiOjE3MDQzOTA2MTF9.78zKz36mBLGsH8-mA3sz9_pSlW_RwwGGkstXJWo6p3s
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDlmMzNkZTVkZjYwMTg4ZDZjZjE5NmUiLCJpYXQiOjE3MDQ0MTk4MTR9.pl4RDSCGoTgM7n-cJaYO2o7EaK5aNeEf1xF_E-p2QE8
