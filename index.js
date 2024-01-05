@@ -304,7 +304,9 @@ app.post('/visitors', verifyToken, async (req, res) => {
  * @swagger
  *  /register:
  *   post:
- *     summary: Register a new user 
+ *     summary: Register a new user
+ *     tags:
+ *        - Admin 
  *     requestBody:
  *       description: User registration details
  *       required: true
@@ -398,6 +400,8 @@ app.post('/register', async (req, res) => {
  *  /register-security:
  *   post:
  *     summary: Register a new security
+ *     tags:
+ *       - Security
  *     description: Register a new security entity with the provided information.
  *     requestBody:
  *       required: true
@@ -486,6 +490,8 @@ app.post('/register-security', async (req, res) => {
  * /visitors/{name}/{email}/access:
  *   get:
  *     summary: Get access info for a visitor
+ *     tags:
+ *       - Visitors
  *     parameters:
  *       - name: name
  *         in: path
@@ -559,6 +565,8 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
  * /visitors:
  *   get:
  *     summary: Retrieve all visitors
+ *     tags:
+ *       - Visitors
  *     responses:
  *       '200':
  *         description: Successful response
@@ -603,6 +611,8 @@ app.get('/visitors', async (req, res) => {
  * /visitors/{id}:
  *   patch:
  *     summary: 'Update Visitor'
+ *     tags:
+ *       - Visitors
  *     description: 'Endpoint to update a visitor by ID'
  *     consumes:
  *       - 'application/json'
