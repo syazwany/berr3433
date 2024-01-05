@@ -50,16 +50,16 @@ function verifyToken(req, res, next) {
         return;
     }
     
-    const secretKey = process.env.JWT_SECRET || 'yourSecretKey'; // Use the same key as in your login function
+    //const secretKey = process.env.JWT_SECRET || 'yourSecretKey'; // Use the same key as in your login function
 
-    jwt.verify(token, secretKey, (err, decoded) => {
+    jwt.verify(token, 'secretKey', (err, decoded) => {
         if (err) {
             console.error('Token verification error:', err);
             res.status(403).json({message: 'Invalid token'});
             return;
         }
 
-        console.log('Decoded token:', decoded);
+       // console.log('Decoded token:', decoded);
 
         req.userId = decoded.userId;
         next();
