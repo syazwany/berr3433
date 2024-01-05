@@ -237,8 +237,6 @@ app.post('/login', async (req, res) => {
  *     description: Create a new visitor with the provided information.
  *     tags:
  *       - Visitors
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -265,6 +263,8 @@ app.post('/login', async (req, res) => {
  *           application/json:
  *             example:
  *               message: An error occurred
+ *       security:
+ *       - bearerAuth: []
  */
 app.post('/visitors', verifyToken, async (req, res) => {
     try {
@@ -284,7 +284,8 @@ app.post('/visitors', verifyToken, async (req, res) => {
         res.status(201).json({
             message: 'Visitor created successfully'
         });
-    } catch (error) {
+    } 
+    catch (error) {
         console.error(error);
         res.status(500).json({
             message: 'An error occurred'
