@@ -265,12 +265,6 @@ app.post('/login', async (req, res) => {
  *           application/json:
  *             example:
  *               message: An error occurred
- * components:
- *  securitySchemes:
- *    bearerAuth:
- *      type: http
- *      scheme: bearer
- *      bearerFormat: JWT
  */
 app.post('/visitors', verifyToken, async (req, res) => {
     try {
