@@ -132,6 +132,7 @@ app.get('/', (req, res) => {
 app.post('/logout', verifyToken, async (req, res) => {
     try {
         // Perform any necessary logout operations
+        console.log('Received Token:', token);
         await db.collection('users').insertOne({ action: 'Logout', userId: req.userId });
         res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
@@ -219,7 +220,7 @@ app.post('/login', async (req, res) => {
 
         // Generate a JSON Web Token (JWT)
         const token = jwt.sign({ userId: user._id }, 'secretKey');
-        //console.log('Generated Token:', token);
+        console.log('Generated Token:', token);
         res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
         console.error('Login error:', error);
