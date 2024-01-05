@@ -236,6 +236,12 @@ app.post('/login', async (req, res) => {
  *     description: Create a new visitor with the provided information.
  *     tags:
  *       - Visitors
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         description: Bearer token for authentication
+ *         required: true
+ *         type: string
  *     requestBody:
  *       required: true
  *       content:
