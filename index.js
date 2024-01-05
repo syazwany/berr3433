@@ -147,6 +147,8 @@ app.post('/logout', verifyToken, async (req, res) => {
  * /login:
  *   post:
  *     summary: Login a user
+ *     tags:
+ *       - Admin
  *     requestBody:
  *       description: User login details
  *       required: true
