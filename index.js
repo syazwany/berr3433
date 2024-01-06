@@ -1085,11 +1085,10 @@ app.post('/create/test/host', async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-
 app.get('/host/visitors', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
-        const decodedToken = req.decoded;
+        //const decodedToken = req.decoded;
         if (req.decoded.role !== 'host') {
             res.status(401).json({ message: 'Unauthorized - Requires host role' });
             return;
@@ -1192,6 +1191,8 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  *     summary: Retrieve the pass for an authenticated visitor
  *     tags:
  *       - Visitor
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       '200':
  *         description: Pass retrieved successfully
@@ -1221,7 +1222,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-app.get('/visitor/pass', async (req, res) => {
+app.get('/visitor/pass',verifyToken, async (req, res) => {
     try {
         // Check if the user has visitor role
         if (req.decoded.role !== 'visitor') {
