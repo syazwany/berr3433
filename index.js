@@ -47,6 +47,10 @@ const option = {
 const swaggerSpec = swaggerJsdoc(option);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+function generatePassIdentifier() {
+    return uuidv4(); // Generates a UUID (e.g., '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+  }
+
 
 // Middleware to verify JWT
 function verifyToken(req, res, next) {
@@ -83,7 +87,7 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-// Logout for user (requires a valid JWT)
+// Logout for host (requires a valid JWT)
 /**
  * @swagger
  * /logout:
@@ -688,7 +692,6 @@ app.get('/visitors', verifyToken, async (req, res) => {
  *                   type: string
  *                   description: An error occurred
  */
-
 app.patch('/visitors/:userId', verifyToken, async (req, res) => {
     try {
         const { userId } = req.params;
@@ -844,6 +847,232 @@ app.post('/create/test/host', async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
+// ...
+
+// Retrieve host contact from visitor pass (Security role)
+/**
+ * @swagger
+ * /visitorPass/{passIdentifier}:
+ *   get:
+ *     summary: Retrieve host contact from visitor pass (Security role)
+ *     description: Get the contact number of the host from the visitor pass using passIdentifier
+ *     tags:
+ *       - Security
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: passIdentifier
+ *         required: true
+ *         description: Unique identifier of the visitor pass
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Host contact retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                   description: Host's name
+ *                 phoneNumber:
+ *                   type: string
+ *                   description: Host's phone number
+ *       '401':
+ *         description: Unauthorized - Access denied
+ *       '404':
+ *         description: Visitor pass not found
+ *       '500':
+ *         description: Internal Server Error
+ */
+
+app.get('/visitorPass/:passIdentifier', verifyToken, async (req, res) => {
+    try {
+      const data = req.user;
+      const passIdentifier = req.params.passIdentifier;
+  
+      // Check if the user has the 'Security' role
+      if (data.role !== 'Security') {
+        return res.status(401).json({ error: 'Unauthorized access' });
+      }
+  
+      // Query the database using passIdentifier to retrieve host contact info from the visitor pass
+      const visitorPass = await client.db('assigment').collection('Records').findOne({ passIdentifier });
+  
+      if (!visitorPass) {
+        return res.status(404).json({ error: 'Visitor pass not found' });
+      }
+  
+      // Return only the host's contact information to the public
+      const hostContact = {
+        name: visitorPass.hostUsername,
+        phoneNumber: visitorPass.hostPhoneNumber,
+      };
+  
+      return res.status(200).json(hostContact);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  /**
+ * @swagger
+ * /issuePass:
+ *   post:
+ *     summary: Issue visitor pass by Host
+ *     description: Issue a visitor pass and add visitor information to Records
+ *     tags:
+ *       - Host
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newName:
+ *                 type: string
+ *               newPhoneNumber:
+ *                 type: string
+ *             required:
+ *               - newName
+ *               - newPhoneNumber
+ *     responses:
+ *       '200':
+ *         description: Visitor pass issued successfully. PassIdentifier generated for the pass.
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: "Visitor pass issued successfully. PassIdentifier: abc123"
+ *       '401':
+ *         description: Unauthorized - Token is missing or invalid
+ */
+
+app.post('/issuePass', verifyToken, async (req, res) => {
+    try {
+      const data = req.user;
+  
+      if (data.role !== 'Host') {
+        return res.status(401).json({ error: 'Unauthorized - Host access only' });
+      }
+  
+      const { newName, newPhoneNumber } = req.body;
+  
+      const passIssueResult = await issueVisitorPass(data, newName, newPhoneNumber, client);
+  
+      if (passIssueResult.success) {
+        return res.status(200).json({ message: 'Visitor pass issued successfully', passIdentifier: passIssueResult.passIdentifier });
+      } else {
+        return res.status(500).json({ error: 'Failed to issue visitor pass' });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  /**
+ * @swagger
+ * /retrievePass:
+ *   get:
+ *     summary: Retrieve visitor pass by PassIdentifier
+ *     description: Retrieve a visitor pass using the PassIdentifier
+ *     tags:
+ *       - Visitor
+ *     parameters:
+ *       - in: query
+ *         name: passIdentifier
+ *         required: true
+ *         description: PassIdentifier for the visitor's pass
+ *     responses:
+ *       '200':
+ *         description: Visitor pass retrieved successfully
+ *       '404':
+ *         description: PassIdentifier not found or invalid
+ */
+
+app.get('/retrievePass', async (req, res) => {
+    try {
+      const passIdentifier = req.query.passIdentifier;
+  
+      // Search for the pass using the provided PassIdentifier
+      const pass = await client.db('assigment').collection('Records').findOne({ passIdentifier });
+  
+      if (!pass) {
+        return res.status(404).send('PassIdentifier not found or invalid');
+      }
+  
+      // Return the pass information if found
+      return res.status(200).json(pass);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send('Internal Server Error');
+    }
+  });
+  
+  /**
+ * @swagger
+ * /Deletesecurity/{username}:
+ *   delete:
+ *     summary: Delete security by Admin
+ *     description: Delete a security user by an admin
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         description: Username of the security user to delete
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Security user deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Deletion success message
+ *       '401':
+ *         description: Unauthorized - Access denied
+ *       '404':
+ *         description: Security user not found
+ *       '500':
+ *         description: Internal Server Error
+ */
+app.delete('/Deletesecurity/:username', verifyToken, async (req, res) => {
+    try {
+      const data = req.user;
+      const { username } = req.params;
+  
+      const deletionResult = await deleteSecurityByAdmin(client, data, username);
+  
+      if (deletionResult === 'Security user deleted successfully') {
+        return res.status(200).json({ message: deletionResult });
+      } else if (deletionResult === 'Security user not found') {
+        return res.status(404).json({ error: deletionResult });
+      } else {
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
 
 //Start the server
 try {
