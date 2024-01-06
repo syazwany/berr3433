@@ -21,6 +21,24 @@ MongoClient.connect(url)
         db = client.db(dbName);
     })
     .catch(error => console.error(error));
+
+    // Function to generate a random string (PassIdentifier)
+function generatePassIdentifier(length = 8) {
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let passIdentifier = '';
+
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        passIdentifier += characters.charAt(randomIndex);
+    }
+
+    return passIdentifier;
+}
+
+// Example usage:
+const passIdentifier = generatePassIdentifier();
+console.log('Generated PassIdentifier:', passIdentifier);
+
     
 // Middleware for parsing JSON data
 app.use(express.json());
@@ -47,6 +65,7 @@ const option = {
 const swaggerSpec = swaggerJsdoc(option);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+  
 
 // Middleware to verify JWT
 function verifyToken(req, res, next) {
@@ -80,10 +99,10 @@ MongoClient.connect(url)
 
 // Start defining your routes here
 app.get('/', (req, res) => {
-    res.send('WELCOME TO VISITOR MANAGEMENT SYSTEM!');
+    res.send('Welcome To Visitor Management System !');
 });
 
-// Logout for user (requires a valid JWT)
+// Logout for host (requires a valid JWT)
 /**
  * @swagger
  * /logout:
@@ -124,17 +143,15 @@ app.post('/logout', verifyToken, async (req, res) => {
     }
 });
 
-
-// Login for user
+// Login for host
 /**
  * @swagger
  * /login:
  *   post:
- *     summary: Login a user
+ *     summary: Log in as a host
  *     tags:
- *       - Admin
+ *       - Hosts
  *     requestBody:
- *       description: User login details
  *       required: true
  *       content:
  *         application/json:
@@ -155,60 +172,54 @@ app.post('/logout', verifyToken, async (req, res) => {
  *           application/json:
  *             example:
  *               message: Login successful
- *               token: <JWT_TOKEN>
  *       '401':
- *         description: Invalid password
+ *         description: Invalid password or host not found
  *         content:
  *           application/json:
  *             example:
- *               message: Invalid password
- *       '404':
- *         description: User not found
- *         content:
- *           application/json:
- *             example:
- *               message: User not found
+ *               message: Invalid password or host not found
  *       '500':
- *         description: An error occurred during login
+ *         description: An error occurred
  *         content:
  *           application/json:
  *             example:
- *               message: An error occurred during login
- */              
-app.post('/login', async (req, res) => {
+ *               message: An error occurred
+ */
+app.post('/login-Admin', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // Find the user in the "users" collection
-        const user = await db.collection('users').findOne({ username });
+        // Find the host in the "hosts" collection
+        const host = await db.collection('hosts').findOne({ username });
 
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
+        if (!host) {
+            res.status(404).json({ message: 'Host not found' });
             return;
         }
 
         // Compare the password
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        const isPasswordMatch = await bcrypt.compare(password, host.password);
 
         if (!isPasswordMatch) {
             res.status(401).json({ message: 'Invalid password' });
             return;
         }
-
-        // // Insert into "visitors" collection
+         // // Insert into "visitors" collection
         // await db.collection('visitors').insertOne({
         //     name: 'Login Visitor',
         //     email: 'login@visitor.com'
         // });
 
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: user.role }, 'secretKey');
+        const token = jwt.sign({ role: host.role }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'An error occurred during login' });
     }
+        res.status(200).json({ message: 'Login successful' });
+    
 });
 
 // Create a new visitor (requires a valid JWT)
@@ -241,11 +252,15 @@ app.post('/login', async (req, res) => {
  *                 description: Email of the visitor
  *               purpose:
  *                 type: string
- *                 description: Purpose of the visit
+ *                 description: Purpose of the visitor
+ *               newPhoneNumber:
+ *                  type: string
+ *                  description: Phone number of the visitor
  *             required:
  *               - name
  *               - email
  *               - purpose
+ *               - newPhoneNumber
  *     responses:
  *       '201':
  *         description: Visitor created successfully
@@ -276,7 +291,8 @@ app.post('/visitors', verifyToken, async (req, res) => {
             userId,
             name,
             email,
-            purpose
+            purpose,
+            newPhoneNumber
         } = req.body;
 
         const decodedToken = req.decoded;
@@ -286,7 +302,8 @@ app.post('/visitors', verifyToken, async (req, res) => {
                 userId,
                 name,
                 email,
-                purpose
+                purpose,
+                newPhoneNumber
             });
             res.status(201).json({
                 message: 'Visitor created successfully'
@@ -300,16 +317,15 @@ app.post('/visitors', verifyToken, async (req, res) => {
     }
 });
 
-// Register a new user
+// Register a new host
 /**
  * @swagger
- *  /register:
+ * /register/host:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new host
  *     tags:
- *        - Admin 
+ *       - Hosts
  *     requestBody:
- *       description: User registration details
  *       required: true
  *       content:
  *         application/json:
@@ -331,25 +347,25 @@ app.post('/visitors', verifyToken, async (req, res) => {
  *               - address
  *     responses:
  *       '201':
- *         description: User registered successfully
+ *         description: Host is registered successfully
  *         content:
  *           application/json:
  *             example:
- *               message: User registered successfully
+ *               message: Host is registered successfully
  *       '409':
- *         description: User with this email already exists
+ *         description: Host with this email already exists
  *         content:
  *           application/json:
  *             example:
- *               message: User with this email already exists
+ *               message: Host with this email already exists
  *       '500':
  *         description: An error occurred
  *         content:
  *           application/json:
  *             example:
  *               message: An error occurred
- */ 
-app.post('/register', async (req, res) => {
+ */
+app.post('/register/host', async (req, res) => {
     try {
         const {
             username,
@@ -358,14 +374,14 @@ app.post('/register', async (req, res) => {
             address
         } = req.body;
 
-        // Check if the user already exists based on email
-        const existingUser = await db.collection('users').findOne({
+        // Check if the host already exists based on email
+        const existingHost = await db.collection('hosts').findOne({
             email
         });
 
-        if (existingUser) {
+        if (existingHost) {
             res.status(409).json({
-                message: 'User with this email already exists'
+                message: 'Host with this email already exists'
             });
             return;
         }
@@ -373,20 +389,20 @@ app.post('/register', async (req, res) => {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert the user into the "users" collection
-        await db.collection('users').insertOne({
-                username: username,
-                password: hashedPassword,
-                email: email,
-                address: address,
-                role: 'admin'
-            });
+        // Insert the host into the "hosts" collection
+        await db.collection('hosts').insertOne({
+            username,
+            password: hashedPassword,
+            email,
+            address,
+            role: 'admin'
+        });
 
         res.status(201).json({
-            message: 'User registered successfully'
+            message: 'Host is registered successfully'
         });
     } catch (error) {
-        console.error(error);
+        console.error('Error registering host:', error);
         res.status(500).json({
             message: 'An error occurred'
         });
@@ -481,6 +497,72 @@ app.post('/register-security', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ *  /login-security:
+ *   post:
+ *     summary: Login as a security entity
+ *     tags:
+ *       - Security
+ *     description: Login with username and password to get a JWT token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             example:
+ *               token: <JWT_TOKEN>
+ *       '401':
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Invalid credentials
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */
+app.post('/login-security', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Find the security with the given username
+        const security = await db.collection('security').findOne({ username });
+        if (!security) {
+            res.status(401).json({ message: 'Invalid credentials' });
+            return;
+        }
+
+        // Check if the provided password matches the hashed password in the database
+        const passwordMatch = await bcrypt.compare(password, security.password);
+        if (!passwordMatch) {
+            res.status(401).json({ message: 'Invalid credentials' });
+            return;
+        }
+
+        // Generate a JWT token
+        const token = jwt.sign({ username: security.username, id: security._id }, 'your-secret-key', { expiresIn: '1h' });
+
+        res.status(200).json({ token });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
 
 // View access info for a visitor
 /**
@@ -694,7 +776,6 @@ app.get('/visitors', verifyToken, async (req, res) => {
  *                   type: string
  *                   description: An error occurred
  */
-
 app.patch('/visitors/:userId', verifyToken, async (req, res) => {
     try {
         const { userId } = req.params;
@@ -801,184 +882,14 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
     }
 });
 
-// Public API for security to create a new host account with security approval
-/**
- * @swagger
- * /create/host:
- *   post:
- *     summary: Create a new host account with security approval
- *     tags:
- *       - Host
- *     security:
- *       - bearerAuth: []  # Use the 'bearerAuth' security scheme for authentication
- *     requestBody:
- *       description: Host details for account creation
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *               email:
- *                 type: string
- *             required:
- *               - name
- *               - username
- *               - password
- *               - email
- *     responses:
- *       '201':
- *         description: Host account created successfully
- *         content:
- *           application/json:
- *             example:
- *               message: Host account created successfully
- *       '401':
- *         description: Unauthorized - Requires security role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires security role
- *       '409':
- *         description: Host already exists
- *         content:
- *           application/json:
- *             example:
- *               message: Host already exists
- *       '500':
- *         description: An error occurred during account creation
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- */
-app.post('/create/host', verifyToken, async (req, res) => {
-    try {
-        // Check if the user has security role
-        if (req.decoded.role !== 'security') {
-            res.status(401).json({ message: 'Unauthorized - Requires security role' });
-            return;
-        }
-
-        const { name, username, password, email } = req.body;
-
-        // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({ username });
-
-        if (existingHost) {
-            res.status(409).json({ message: 'Host already exists' });
-            return;
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert the host into the "hosts" collection
-        await db.collection('hosts').insertOne({
-            name,
-            username,
-            password: hashedPassword,
-            email
-        });
-
-        res.status(201).json({ message: 'Host account created successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
-    }
-});
-
-// Public API for host login and token generation
-/**
- * @swagger
- * /host/login:
- *   post:
- *     summary: Host Login
- *     tags:
- *       - Host
- *     requestBody:
- *       description: Host login details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *             required:
- *               - username
- *               - password
- *     responses:
- *       '200':
- *         description: Login successful, returns token
- *         content:
- *           application/json:
- *             example:
- *               message: Login successful
- *               token: <JWT_TOKEN>
- *       '401':
- *         description: Invalid password or host user not found
- *         content:
- *           application/json:
- *             example:
- *               message: Invalid password or host user not found
- *       '500':
- *         description: An error occurred during login
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred during login
- */
-app.post('/host/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        // Find the host user in the "hosts" collection
-        const hostUser = await db.collection('hosts').findOne({ username });
-
-        if (!hostUser) {
-            res.status(401).json({ message: 'Invalid password or host user not found' });
-            return;
-        }
-
-        // Compare the password
-        const isPasswordMatch = await bcrypt.compare(password, hostUser.password);
-
-        if (!isPasswordMatch) {
-            res.status(401).json({ message: 'Invalid password or host user not found' });
-            return;
-        }
-
-        // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
-        console.log('Generated Token:', token);
-        
-        res.status(200).json({ message: 'Login successful', token });
-    } catch (error) {
-        console.error('Host Login error:', error);
-        res.status(500).json({ message: 'An error occurred during login' });
-    }
-});
-
-// Public API for testing without security approval (e.g., /create/test/host)
 /**
  * @swagger
  * /create/test/host:
  *   post:
- *     summary: Create a test host account without security approval
+ *     summary: Create a new test host account without security approval
  *     tags:
- *       - Testing
+ *       - Hosts
  *     requestBody:
- *       description: Host details for test account creation
  *       required: true
  *       content:
  *         application/json:
@@ -993,26 +904,15 @@ app.post('/host/login', async (req, res) => {
  *                 type: string
  *               email:
  *                 type: string
- *             required:
- *               - name
- *               - username
- *               - password
- *               - email
  *     responses:
  *       '201':
- *         description: Test Host account created successfully
+ *         description: Test host account created successfully
  *         content:
  *           application/json:
  *             example:
- *               message: Test Host account created successfully
- *       '409':
- *         description: Host already exists
- *         content:
- *           application/json:
- *             example:
- *               message: Host already exists
+ *               message: Test host account created successfully
  *       '500':
- *         description: An error occurred during test account creation
+ *         description: An error occurred
  *         content:
  *           application/json:
  *             example:
@@ -1020,497 +920,245 @@ app.post('/host/login', async (req, res) => {
  */
 app.post('/create/test/host', async (req, res) => {
     try {
+        // Extract host information from the request body
         const { name, username, password, email } = req.body;
 
-        // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({ username });
+        // TODO: Add logic to create a new test host account (insert into the database)
 
-        if (existingHost) {
-            res.status(409).json({ message: 'Host already exists' });
-            return;
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert the host into the "hosts" collection
-        await db.collection('hosts').insertOne({
-            name,
-            username,
-            password: hashedPassword,
-            email
-        });
-
-        res.status(201).json({ message: 'Test Host account created successfully' });
+        res.status(201).json({ message: 'Test host account created successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
 });
 
-// Public API for authenticated host to see all created visitors
+// ...
+
+// Retrieve host contact from visitor pass (Security role)
 /**
  * @swagger
- * /host/visitors:
+ * /visitorPass/{passIdentifier}:
  *   get:
- *     summary: Retrieve all created visitors for an authenticated host
+ *     summary: Retrieve host contact from visitor pass (Security role)
+ *     description: Get the contact number of the host from the visitor pass using passIdentifier
  *     tags:
- *       - Visitor
+ *       - Security
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: passIdentifier
+ *         required: true
+ *         description: Unique identifier of the visitor pass
+ *         schema:
+ *           type: string
  *     responses:
  *       '200':
- *         description: List of visitors retrieved successfully
+ *         description: Host contact retrieved successfully
  *         content:
  *           application/json:
- *             example:
- *               - userId: 1
- *                 name: Visitor 1
- *                 email: visitor1@example.com
- *                 purpose: Meeting
- *               - userId: 2
- *                 name: Visitor 2
- *                 email: visitor2@example.com
- *                 purpose: Delivery
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                   description: Host's name
+ *                 phoneNumber:
+ *                   type: string
+ *                   description: Host's phone number
  *       '401':
- *         description: Unauthorized - Requires host role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires host role. Ensure the provided token has the 'host' role.
+ *         description: Unauthorized - Access denied
+ *       '404':
+ *         description: Visitor pass not found
  *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
+ *         description: Internal Server Error
  */
-app.get('/host/visitors', verifyToken, async (req, res) => {
+
+app.get('/visitorPass/:passIdentifier', verifyToken, async (req, res) => {
     try {
-        // Check if the user has host role
-        //const decodedToken = req.decoded;
-        if (req.decoded.role !== 'host') {
-            res.status(401).json({ message: 'Unauthorized - Requires host role' });
-            return;
-        }
-
-        // Retrieve all visitors for the authenticated host from the "visitors" collection
-        const visitors = await db.collection('visitors').find({ hostUsername: req.decoded.username }).toArray();
-        res.status(200).json(visitors);
+      const data = req.user;
+      const passIdentifier = req.params.passIdentifier;
+  
+      // Check if the user has the 'Security' role
+      if (data.role !== 'Security') {
+        return res.status(401).json({ error: 'Unauthorized access' });
+      }
+  
+      // Query the database using passIdentifier to retrieve host contact info from the visitor pass
+      const visitorPass = await client.db('assigment').collection('Records').findOne({ passIdentifier });
+  
+      if (!visitorPass) {
+        return res.status(404).json({ error: 'Visitor pass not found' });
+      }
+  
+      // Return only the host's contact information to the public
+      const hostContact = {
+        name: visitorPass.hostUsername,
+        phoneNumber: visitorPass.hostPhoneNumber,
+      };
+  
+      return res.status(200).json(hostContact);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
-    }   
-    
-});
-
-// Public API for authenticated host to issue a visitor pass
-/**
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  /**
  * @swagger
- * /host/issue-pass:git
+ * /issuePass:
  *   post:
- *     summary: Issue a visitor pass for an authenticated host
+ *     summary: Issue visitor pass by Host
+ *     description: Issue a visitor pass and add visitor information to Records
  *     tags:
  *       - Host
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       description: Visitor details for issuing a pass
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               newName:
  *                 type: string
- *               email:
- *                 type: string
- *               purpose:
+ *               newPhoneNumber:
  *                 type: string
  *             required:
- *               - name
- *               - email
- *               - purpose
+ *               - newName
+ *               - newPhoneNumber
  *     responses:
- *       '201':
- *         description: Visitor pass issued successfully
+ *       '200':
+ *         description: Visitor pass issued successfully. PassIdentifier generated for the pass.
  *         content:
- *           application/json:
- *             example:
- *               message: Visitor pass issued successfully
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: "Visitor pass issued successfully. PassIdentifier: abc123"
  *       '401':
- *         description: Unauthorized - Requires host role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires host role
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
+ *         description: Unauthorized - Token is missing or invalid
  */
-app.post('/host/issue-pass', verifyToken, async (req, res) => {
+app.post('/issuePass', verifyToken, async (req, res) => {
     try {
-        // Check if the user has host role
-        if (req.decoded.role !== 'host') {
-            res.status(401).json({ message: 'Unauthorized - Requires host role' });
-            return;
-        }
-
-        const {
-            name,
-            email,
-            purpose
-        } = req.body;
-
-        // Insert the visitor into the "visitors" collection
-        await db.collection('visitors').insertOne({
-            hostUsername: req.decoded.username,
-            name,
-            email,
-            purpose
-        });
-
-        res.status(201).json({
-            message: 'Visitor pass issued successfully'
-        });
+      const data = req.user;
+  
+      if (data.role !== 'Host') {
+        return res.status(401).json({ error: 'Unauthorized - Host access only' });
+      }
+  
+      const { newName, newPhoneNumber } = req.body;
+  
+      // Use the generatePassIdentifier function to get a new pass identifier
+      const passIdentifier = generatePassIdentifier();
+  
+      const passIssueResult = await issueVisitorPass(data, newName, newPhoneNumber, client, passIdentifier);
+  
+      if (passIssueResult.success) {
+        return res.status(200).json({ message: 'Visitor pass issued successfully', passIdentifier: passIdentifier });
+      } else {
+        return res.status(500).json({ error: 'Failed to issue visitor pass' });
+      }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+  });
 
-// Public API for a visitor to retrieve the pass
-/**
+  /**
  * @swagger
- * /visitor/pass:
+ * /retrievePass:
  *   get:
- *     summary: Retrieve the pass for an authenticated visitor
+ *     summary: Retrieve visitor pass by PassIdentifier
+ *     description: Retrieve a visitor pass using the PassIdentifier
  *     tags:
  *       - Visitor
- *     security:
- *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: passIdentifier
+ *         required: true
+ *         description: PassIdentifier for the visitor's pass
  *     responses:
  *       '200':
- *         description: Pass retrieved successfully
- *         content:
- *           application/json:
- *             example:
- *               hostUsername: sampleHost
- *               name: Sample Visitor
- *               email: sample@visitor.com
- *               purpose: Business meeting
- *       '401':
- *         description: Unauthorized - Requires visitor role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires visitor role
+ *         description: Visitor pass retrieved successfully
  *       '404':
- *         description: Pass not found
- *         content:
- *           application/json:
- *             example:
- *               message: Pass not found
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
+ *         description: PassIdentifier not found or invalid
  */
-app.get('/visitor/pass',verifyToken, async (req, res) => {
+
+app.get('/retrievePass', async (req, res) => {
     try {
-        // Check if the user has visitor role
-        if (req.decoded.role !== 'visitor') {
-            res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
-            return;
-        }
-
-        // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({ email: req.decoded.email });
-        
-        if (!pass) {
-            res.status(404).json({ message: 'Pass not found' });
-            return;
-        }
-
-        res.status(200).json(pass);
+      const passIdentifier = req.query.passIdentifier;
+  
+      // Search for the pass using the provided PassIdentifier
+      const pass = await client.db('assigment').collection('Records').findOne({ passIdentifier });
+  
+      if (!pass) {
+        return res.status(404).send('PassIdentifier not found or invalid');
+      }
+  
+      // Return the pass information if found
+      return res.status(200).json(pass);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+      console.error(error);
+      return res.status(500).send('Internal Server Error');
     }
-});
-
-// Additional API to manage account roles by an authenticated administrator
-/**
+  });
+  
+  /**
  * @swagger
- * /admin/manage-roles:
- *   patch:
- *     summary: Manage account roles by an authenticated administrator
+ * /Deletesecurity/{username}:
+ *   delete:
+ *     summary: Delete security by Admin
+ *     description: Delete a security user by an admin
  *     tags:
  *       - Admin
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       description: Account role details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               role:
- *                 type: string
- *             required:
- *               - username
- *               - role
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         description: Username of the security user to delete
+ *         schema:
+ *           type: string
  *     responses:
  *       '200':
- *         description: Account role updated successfully
+ *         description: Security user deleted successfully
  *         content:
  *           application/json:
- *             example:
- *               message: Account role updated successfully
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Deletion success message
  *       '401':
- *         description: Unauthorized - Requires admin role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires admin role
- *       '400':
- *         description: Invalid role specified
- *         content:
- *           application/json:
- *             example:
- *               message: Invalid role specified
+ *         description: Unauthorized - Access denied
  *       '404':
- *         description: Account not found
- *         content:
- *           application/json:
- *             example:
- *               message: Account not found
+ *         description: Security user not found
  *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
+ *         description: Internal Server Error
  */
-app.patch('/admin/manage-roles', verifyToken, async (req, res) => {
+app.delete('/Deletesecurity/:username', verifyToken, async (req, res) => {
     try {
-        const { username, role } = req.body;
-
-        // Check if the user has admin role
-        if (req.decoded.role !== 'admin') {
-            res.status(401).json({ message: 'Unauthorized - Requires admin role' });
-            return;
-        }
-
-        // Validate that the role is either 'security' or 'host'
-        if (role !== 'security' && role !== 'host') {
-            res.status(400).json({ message: 'Invalid role specified' });
-            return;
-        }
-
-        // Update the account role in the respective collection (security/host)
-        const collectionName = role === 'security' ? 'security' : 'hosts';
-        const result = await db.collection(collectionName).updateOne(
-            { username },
-            { $set: { role } }
-        );
-
-        if (result.matchedCount === 1) {
-            res.status(200).json({ message: 'Account role updated successfully' });
-        } else {
-            res.status(404).json({ message: 'Account not found' });
-        }
+      const data = req.user;
+      const { username } = req.params;
+  
+      const deletionResult = await deleteSecurityByAdmin(client, data, username);
+  
+      if (deletionResult === 'Security user deleted successfully') {
+        return res.status(200).json({ message: deletionResult });
+      } else if (deletionResult === 'Security user not found') {
+        return res.status(404).json({ error: deletionResult });
+      } else {
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
-});
-
-
-// Additional API to manage account roles by an authenticated administrator
-/**
- * @swagger
- * /admin/manage-roles:
- *   patch:
- *     summary: Manage account roles by an authenticated administrator
- *     tags:
- *       - Admin
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       description: Account role details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               role:
- *                 type: string
- *             required:
- *               - username
- *               - role
- *     responses:
- *       '200':
- *         description: Account role updated successfully
- *         content:
- *           application/json:
- *             example:
- *               message: Account role updated successfully
- *       '401':
- *         description: Unauthorized - Requires admin role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires admin role
- *       '400':
- *         description: Invalid role specified
- *         content:
- *           application/json:
- *             example:
- *               message: Invalid role specified
- *       '404':
- *         description: Account not found
- *         content:
- *           application/json:
- *             example:
- *               message: Account not found
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- */
-app.patch('/admin/manage-roles', verifyToken, async (req, res) => {
-    try {
-        const { username, role } = req.body;
-
-        // Check if the user has admin role
-        if (req.decoded.role !== 'admin') {
-            res.status(401).json({ message: 'Unauthorized - Requires admin role' });
-            return;
-        }
-
-        // Validate that the role is either 'security' or 'host'
-        if (role !== 'security' && role !== 'host') {
-            res.status(400).json({ message: 'Invalid role specified' });
-            return;
-        }
-
-        // Update the account role in the respective collection (security/host)
-        const collectionName = role === 'security' ? 'security' : 'hosts';
-        const result = await db.collection(collectionName).updateOne(
-            { username },
-            { $set: { role } }
-        );
-
-        if (result.matchedCount === 1) {
-            res.status(200).json({ message: 'Account role updated successfully' });
-        } else {
-            res.status(404).json({ message: 'Account not found' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
-    }
-});
-
-// Administrator login page (dump all host data upon successful login)
-/**
- * @swagger
- * /admin/login:
- *   post:
- *     summary: Dump all host data upon successful login
- *     tags:
- *       - Admin
- *     requestBody:
- *       description: Administrator login details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *             required:
- *               - username
- *               - password
- *     responses:
- *       '200':
- *         description: Login successful
- *         content:
- *           application/json:
- *             example:
- *               message: Login successful
- *               token: <JWT_TOKEN>
- *               hosts:
- *                 - host1
- *                 - host2
- *                 - host3
- *       '401':
- *         description: Invalid password or admin user not found
- *         content:
- *           application/json:
- *             example:
- *               message: Invalid password or admin user not found
- *       '500':
- *         description: An error occurred during login
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred during login
- */
-app.post('/admin/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        // Find the admin user in the "admins" collection
-        const adminUser = await db.collection('admins').findOne({ username });
-
-        if (!adminUser) {
-            res.status(401).json({ message: 'Invalid password or admin user not found' });
-            return;
-        }
-
-        // Compare the password
-        const isPasswordMatch = await bcrypt.compare(password, adminUser.password);
-
-        if (!isPasswordMatch) {
-            res.status(401).json({ message: 'Invalid password or admin user not found' });
-            return;
-        }
-
-        // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: adminUser.role, username: adminUser.username }, 'secretKey');
-
-        // Retrieve all host data from the "hosts" collection
-        const hosts = await db.collection('hosts').find().toArray();
-
-        console.log('Generated Token:', token);
-        res.status(200).json({ message: 'Login successful', token, hosts });
-    } catch (error) {
-        console.error('Admin Login error:', error);
-        res.status(500).json({ message: 'An error occurred during login' });
-    }
-});
-
-
+  });
+  
 
 //Start the server
 try {
@@ -1521,4 +1169,3 @@ try {
     console.error('Error connecting to MongoDB:', error);
     // Handle any errors related to MongoDB connection here
 }
-
