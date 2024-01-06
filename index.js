@@ -5,6 +5,7 @@ const {MongoClient} = require('mongodb');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
+
 const app = express();
 const port = process.env.PORT || 3000;
 const { ObjectID } = require('mongodb');
@@ -48,9 +49,9 @@ const swaggerSpec = swaggerJsdoc(option);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 function generatePassIdentifier() {
-    return uuidv4(); // Generates a UUID (e.g., '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+    return uuid();
   }
-
+  
 
 // Middleware to verify JWT
 function verifyToken(req, res, next) {
@@ -961,7 +962,6 @@ app.get('/visitorPass/:passIdentifier', verifyToken, async (req, res) => {
  *       '401':
  *         description: Unauthorized - Token is missing or invalid
  */
-
 app.post('/issuePass', verifyToken, async (req, res) => {
     try {
       const data = req.user;
@@ -972,10 +972,13 @@ app.post('/issuePass', verifyToken, async (req, res) => {
   
       const { newName, newPhoneNumber } = req.body;
   
-      const passIssueResult = await issueVisitorPass(data, newName, newPhoneNumber, client);
+      // Use the generatePassIdentifier function to get a new pass identifier
+      const passIdentifier = generatePassIdentifier();
+  
+      const passIssueResult = await issueVisitorPass(data, newName, newPhoneNumber, client, passIdentifier);
   
       if (passIssueResult.success) {
-        return res.status(200).json({ message: 'Visitor pass issued successfully', passIdentifier: passIssueResult.passIdentifier });
+        return res.status(200).json({ message: 'Visitor pass issued successfully', passIdentifier: passIdentifier });
       } else {
         return res.status(500).json({ error: 'Failed to issue visitor pass' });
       }
