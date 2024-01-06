@@ -1075,7 +1075,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-app.post('/host/issue-pass', verifyToken, async (req, res) => {
+app.post('/host/issue-pass', async (req, res) => {
     try {
         // Check if the user has host role
         if (req.decoded.role !== 'host') {
@@ -1356,7 +1356,7 @@ app.patch('/admin/manage-roles', verifyToken, async (req, res) => {
  * @swagger
  * /admin/login:
  *   post:
- *     summary: Administrator Login
+ *     summary: Dump all host data upon successful login
  *     tags:
  *       - Admin
  *     requestBody:
