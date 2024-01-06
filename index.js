@@ -866,7 +866,16 @@ app.post('/create/host', verifyToken, async (req, res) => {
         // Extract host information from the request body
         const { name, username, password, email } = req.body;
 
-        // TODO: Add logic to create a new host account (insert into the database)
+       // Hash the password
+       const hashedPassword = await bcrypt.hash(password, 10);
+
+       // Insert the new host into the "hosts" collection
+       await db.collection('hosts').insertOne({
+           name,
+           username,
+           password: hashedPassword,
+           email
+       });
 
         res.status(201).json({ message: 'Host account created successfully' });
     } catch (error) {
@@ -917,7 +926,16 @@ app.post('/create/test/host', async (req, res) => {
         // Extract host information from the request body
         const { name, username, password, email } = req.body;
 
-        // TODO: Add logic to create a new test host account (insert into the database)
+       // Hash the password
+       const hashedPassword = await bcrypt.hash(password, 10);
+
+       // Insert the new test host into the "hosts" collection
+       await db.collection('hosts').insertOne({
+           name,
+           username,
+           password: hashedPassword,
+           email
+       });
 
         res.status(201).json({ message: 'Test host account created successfully' });
     } catch (error) {
@@ -927,7 +945,7 @@ app.post('/create/test/host', async (req, res) => {
 });
 
 
-// Start the server
+//Start the server
 try {
     app.listen(port, () => {
        console.log(`Server running on port ${port}`);
