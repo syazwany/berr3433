@@ -239,11 +239,15 @@ app.post('/login', async (req, res) => {
  *                 description: Email of the visitor
  *               purpose:
  *                 type: string
- *                 description: Purpose of the visit
+ *                 description: Purpose of the visitor
+ *               newPhoneNumber:
+ *                  type: string
+ *                  description: Phone number of the visitor
  *             required:
  *               - name
  *               - email
  *               - purpose
+ *               - newPhoneNumber
  *     responses:
  *       '201':
  *         description: Visitor created successfully
@@ -274,7 +278,8 @@ app.post('/visitors', verifyToken, async (req, res) => {
             userId,
             name,
             email,
-            purpose
+            purpose,
+            newPhoneNumber
         } = req.body;
 
         const decodedToken = req.decoded;
@@ -284,7 +289,8 @@ app.post('/visitors', verifyToken, async (req, res) => {
                 userId,
                 name,
                 email,
-                purpose
+                purpose,
+                newPhoneNumber
             });
             res.status(201).json({
                 message: 'Visitor created successfully'
