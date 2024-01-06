@@ -80,7 +80,7 @@ MongoClient.connect(url)
 
 // Start defining your routes here
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.send('WELCOME TO VISITOR MANAGEMENT SYSTEM!');
 });
 
 // Logout for user (requires a valid JWT)
@@ -1002,7 +1002,7 @@ app.post('/create/test/host', async (req, res) => {
  *         content:
  *           application/json:
  *             example:
- *               message: Unauthorized - Requires host role
+ *               message: Unauthorized - Requires host role. Ensure the provided token has the 'host' role.
  *       '500':
  *         description: An error occurred
  *         content:
@@ -1010,9 +1010,11 @@ app.post('/create/test/host', async (req, res) => {
  *             example:
  *               message: An error occurred
  */
+
 app.get('/host/visitors', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
+        const decodedToken = req.decoded;
         if (req.decoded.role !== 'host') {
             res.status(401).json({ message: 'Unauthorized - Requires host role' });
             return;
@@ -1024,13 +1026,14 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
-    }
+    }   
+    
 });
 
 // Public API for authenticated host to issue a visitor pass
 /**
  * @swagger
- * /host/issue-pass:
+ * /host/issue-pass:git
  *   post:
  *     summary: Issue a visitor pass for an authenticated host
  *     tags:
