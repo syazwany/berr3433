@@ -830,7 +830,7 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
 // Public API for security to create a new host account (e.g., /create/host):
 /**
  * @swagger
- *  /create/host:
+ * /create/host:
  *   post:
  *     summary: Create a new host account
  *     tags:
@@ -870,6 +870,12 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
  *           application/json:
  *             example:
  *               message: Host account already exists
+ *       '401':
+ *         description: Unauthorized - Requires security role
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Requires security role
  *       '500':
  *         description: An error occurred
  *         content:
@@ -879,6 +885,13 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
  */
 app.post('/create/host', verifyToken, async (req, res) => {
     try {
+        // Ensure that the user has the "security" role
+        if (req.decoded.role !== 'security') {
+            return res.status(401).json({
+                message: 'Unauthorized - Requires security role'
+            });
+        }
+
         const {
             name,
             username,
@@ -890,25 +903,25 @@ app.post('/create/host', verifyToken, async (req, res) => {
         const existingHost = await db.collection('hosts').findOne({
             username
         });
+
         if (existingHost) {
-           return  res.status(409).json({
+            return res.status(409).json({
                 message: 'Host account already exists'
             });
-            
         }
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insert the host into the "hosts" collection
-        const result = await db.collection('hosts').insertOne({
+        await db.collection('hosts').insertOne({
             name,
             username,
             password: hashedPassword,
             email
         });
 
-        res.status(201).json({
+        return res.status(201).json({
             message: 'Host account created successfully'
         });
     } catch (error) {
@@ -918,6 +931,8 @@ app.post('/create/host', verifyToken, async (req, res) => {
         });
     }
 });
+
+
 // Testing API without security approval (e.g., /create/test/host):
 /**
  * @swagger
