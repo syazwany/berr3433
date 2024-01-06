@@ -193,7 +193,7 @@ app.post('/login/host', async (req, res) => {
         // });
 
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: user.role }, 'secretKey');
+        const token = jwt.sign({ role: host.role }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
