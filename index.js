@@ -810,6 +810,122 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
     }
 });
 
+// Public API for security to create a new host account (e.g., /create/host):
+/**
+ * @swagger
+ * /create/host:
+ *   post:
+ *     summary: Create a new host account
+ *     tags:
+ *       - Security
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       '201':
+ *         description: Host account created successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Host account created successfully
+ *       '401':
+ *         description: Unauthorized - Invalid token or insufficient permissions
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Invalid token or insufficient permissions
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */
+app.post('/create/host', verifyToken, async (req, res) => {
+    try {
+        // Check if the user has security role
+        if (req.decoded.role !== 'security') {
+            res.status(401).json({ message: 'Unauthorized - Requires security role' });
+            return;
+        }
+
+        // Extract host information from the request body
+        const { name, username, password, email } = req.body;
+
+        // TODO: Add logic to create a new host account (insert into the database)
+
+        res.status(201).json({ message: 'Host account created successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
+
+// Testing API without security approval (e.g., /create/test/host):
+/**
+ * @swagger
+ * /create/test/host:
+ *   post:
+ *     summary: Create a new test host account without security approval
+ *     tags:
+ *       - Testing
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       '201':
+ *         description: Test host account created successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Test host account created successfully
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */
+app.post('/create/test/host', async (req, res) => {
+    try {
+        // Extract host information from the request body
+        const { name, username, password, email } = req.body;
+
+        // TODO: Add logic to create a new test host account (insert into the database)
+
+        res.status(201).json({ message: 'Test host account created successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
+
 
 // Start the server
 try {
