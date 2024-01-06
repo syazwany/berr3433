@@ -102,7 +102,7 @@ MongoClient.connect(url)
 
 // Start defining your routes here
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.send('Welcome To Visitor Management System !');
 });
 
 // Logout for host (requires a valid JWT)
@@ -189,7 +189,7 @@ app.post('/logout', verifyToken, async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-app.post('/login', async (req, res) => {
+app.post('/login-Admin', async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -500,6 +500,73 @@ app.post('/register-security', async (req, res) => {
         res.status(500).json({
             message: 'An error occurred'
         });
+    }
+});
+
+/**
+ * @swagger
+ *  /login-security:
+ *   post:
+ *     summary: Login as a security entity
+ *     tags:
+ *       - Security
+ *     description: Login with username and password to get a JWT token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             example:
+ *               token: <JWT_TOKEN>
+ *       '401':
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Invalid credentials
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */
+app.post('/login-security', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Find the security with the given username
+        const security = await db.collection('security').findOne({ username });
+        if (!security) {
+            res.status(401).json({ message: 'Invalid credentials' });
+            return;
+        }
+
+        // Check if the provided password matches the hashed password in the database
+        const passwordMatch = await bcrypt.compare(password, security.password);
+        if (!passwordMatch) {
+            res.status(401).json({ message: 'Invalid credentials' });
+            return;
+        }
+
+        // Generate a JWT token
+        const token = jwt.sign({ username: security.username, id: security._id }, 'your-secret-key', { expiresIn: '1h' });
+
+        res.status(200).json({ token });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
     }
 });
 
