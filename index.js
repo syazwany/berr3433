@@ -808,7 +808,7 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
  *   post:
  *     summary: Create a new host account with security approval
  *     tags:
- *       - Public API
+ *       - Host
  *     security:
  *       - bearerAuth: []  # Use the 'bearerAuth' security scheme for authentication
  *     requestBody:
