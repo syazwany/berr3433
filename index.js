@@ -410,7 +410,50 @@ app.get('/visitor/pass', async (req, res) => {
     }
 });
 
-// Admin Login
+//login admin
+/**
+ * @swagger
+ * /admin/login:
+ *   post:
+ *     summary: Admin Login
+ *     tags:
+ *       - Admin
+ *     requestBody:
+ *       description: Admin login details
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required:
+ *               - username
+ *               - password
+ *     responses:
+ *       '200':
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Login successful
+ *               token: <JWT_TOKEN>
+ *       '401':
+ *         description: Invalid password or admin user not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Invalid password or admin user not found
+ *       '500':
+ *         description: An error occurred during login
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred during login
+ */
 app.post('/admin/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -419,7 +462,7 @@ app.post('/admin/login', async (req, res) => {
         const adminUser = await db.collection('admins').findOne({ username });
 
         if (!adminUser) {
-            res.status(404).json({ message: 'Admin user not found' });
+            res.status(401).json({ message: 'Invalid password or admin user not found' });
             return;
         }
 
@@ -427,7 +470,7 @@ app.post('/admin/login', async (req, res) => {
         const isPasswordMatch = await bcrypt.compare(password, adminUser.password);
 
         if (!isPasswordMatch) {
-            res.status(401).json({ message: 'Invalid password' });
+            res.status(401).json({ message: 'Invalid password or admin user not found' });
             return;
         }
 
@@ -441,7 +484,49 @@ app.post('/admin/login', async (req, res) => {
     }
 });
 
-// Dump all host data upon successful login
+
+// retrieve hsot data
+/**
+ * @swagger
+ * /admin/dashboard:
+ *   get:
+ *     summary: Admin Dashboard - Retrieve all host data
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []  # Requires a bearer token for authorization
+ *     responses:
+ *       '200':
+ *         description: Host data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Host'
+ *       '401':
+ *         description: Unauthorized - Requires admin role
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Requires admin role
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ * definitions:
+ *   Host:
+ *     type: object
+ *     properties:
+ *       name:
+ *         type: string
+ *       username:
+ *         type: string
+ *       email:
+ *         type: string
+ */
 app.get('/admin/dashboard', verifyToken, async (req, res) => {
     try {
         // Check if the user has admin role
