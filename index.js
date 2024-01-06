@@ -1145,7 +1145,7 @@ app.post('/host/issue-pass', async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-app.get('/visitor/pass', verifyToken, async (req, res) => {
+app.get('/visitor/pass', async (req, res) => {
     try {
         // Check if the user has visitor role
         if (req.decoded.role !== 'visitor') {
