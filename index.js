@@ -125,7 +125,7 @@ app.post('/logout', verifyToken, async (req, res) => {
 });
 
 
-// Login for user
+// Login for host
 /**
  * @swagger
  * /login:
@@ -335,7 +335,55 @@ app.post('/visitors', verifyToken, async (req, res) => {
  *             example:
  *               message: An error occurred
  */ 
-app.post('/register', async (req, res) => {
+
+/**
+ * @swagger
+ * /register/host:
+ *   post:
+ *     summary: Register a new host
+ *     tags:
+ *       - Hosts
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *             required:
+ *               - username
+ *               - password
+ *               - email
+ *               - address
+ *     responses:
+ *       '201':
+ *         description: Host is registered successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Host is registered successfully
+ *       '409':
+ *         description: Host with this email already exists
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Host with this email already exists
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */
+app.post('/register/host', async (req, res) => {
     try {
         const {
             username,
@@ -344,14 +392,14 @@ app.post('/register', async (req, res) => {
             address
         } = req.body;
 
-        // Check if the user already exists based on email
-        const existingUser = await db.collection('users').findOne({
+        // Check if the host already exists based on email
+        const existingHost = await db.collection('host').findOne({
             email
         });
 
-        if (existingUser) {
+        if (existingHost) {
             res.status(409).json({
-                message: 'User with this email already exists'
+                message: 'Host with this email already exists'
             });
             return;
         }
@@ -359,25 +407,26 @@ app.post('/register', async (req, res) => {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert the user into the "users" collection
-        await db.collection('users').insertOne({
-                username: username,
-                password: hashedPassword,
-                email: email,
-                address: address,
-                role: 'admin'
-            });
+        // Insert the host into the "hosts" collection
+        await db.collection('host').insertOne({
+            username,
+            password: hashedPassword,
+            email,
+            address,
+            role: 'admin'
+        });
 
         res.status(201).json({
-            message: 'User registered successfully'
+            message: 'Host is registered successfully'
         });
     } catch (error) {
-        console.error(error);
+        console.error('Error registering host:', error);
         res.status(500).json({
             message: 'An error occurred'
         });
     }
 });
+
 
 // Register a new security
 /**
@@ -793,7 +842,7 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
  *   post:
  *     summary: Create a new test host account without security approval
  *     tags:
- *       - Testing
+ *       - Host
  *     requestBody:
  *       required: true
  *       content:
