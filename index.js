@@ -167,7 +167,7 @@ app.post('/logout', verifyToken, async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-app.post('/login', async (req, res) => {
+app.post('/login/host', async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -286,56 +286,7 @@ app.post('/visitors', verifyToken, async (req, res) => {
     }
 });
 
-// Register a new user
-/**
- * @swagger
- *  /register:
- *   post:
- *     summary: Register a new user
- *     tags:
- *        - Admin 
- *     requestBody:
- *       description: User registration details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *               email:
- *                 type: string
- *               address:
- *                 type: string
- *             required:
- *               - username
- *               - password
- *               - email
- *               - address
- *     responses:
- *       '201':
- *         description: User registered successfully
- *         content:
- *           application/json:
- *             example:
- *               message: User registered successfully
- *       '409':
- *         description: User with this email already exists
- *         content:
- *           application/json:
- *             example:
- *               message: User with this email already exists
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- */ 
-
+// Register a new host
 /**
  * @swagger
  * /register/host:
@@ -393,7 +344,7 @@ app.post('/register/host', async (req, res) => {
         } = req.body;
 
         // Check if the host already exists based on email
-        const existingHost = await db.collection('host').findOne({
+        const existingHost = await db.collection('hosts').findOne({
             email
         });
 
@@ -408,7 +359,7 @@ app.post('/register/host', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insert the host into the "hosts" collection
-        await db.collection('host').insertOne({
+        await db.collection('hosts').insertOne({
             username,
             password: hashedPassword,
             email,
