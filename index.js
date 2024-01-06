@@ -10,6 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const { ObjectID } = require('mongodb');
 
+
 // MongoDB connection URL
 const url = 'mongodb+srv://wany:wany123@wany.ccwpslo.mongodb.net/?retryWrites=true&w=majority';
 const dbName = 'VisitorManagementSystem'; // database name
@@ -22,6 +23,24 @@ MongoClient.connect(url)
         db = client.db(dbName);
     })
     .catch(error => console.error(error));
+
+    // Function to generate a random string (PassIdentifier)
+function generatePassIdentifier(length = 8) {
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let passIdentifier = '';
+
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        passIdentifier += characters.charAt(randomIndex);
+    }
+
+    return passIdentifier;
+}
+
+// Example usage:
+const passIdentifier = generatePassIdentifier();
+console.log('Generated PassIdentifier:', passIdentifier);
+
     
 // Middleware for parsing JSON data
 app.use(express.json());
@@ -48,9 +67,7 @@ const option = {
 const swaggerSpec = swaggerJsdoc(option);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-function generatePassIdentifier() {
-    return uuid();
-  }
+
   
 
 // Middleware to verify JWT
