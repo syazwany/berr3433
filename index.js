@@ -410,6 +410,78 @@ app.get('/visitor/pass', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ *  /admin/register:
+ *   post:
+ *     summary: Register a new admin user
+ *     tags:
+ *       - Admin
+ *     requestBody:
+ *       description: Admin registration details
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required:
+ *               - username
+ *               - password
+ *     responses:
+ *       '201':
+ *         description: Admin user registered successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Admin user registered successfully
+ *       '409':
+ *         description: Admin user with this username already exists
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Admin user with this username already exists
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */
+app.post('/admin/register', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Check if the admin user already exists based on username
+        const existingAdmin = await db.collection('admins').findOne({ username });
+
+        if (existingAdmin) {
+            res.status(409).json({ message: 'Admin user with this username already exists' });
+            return;
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert the admin user into the "admins" collection
+        await db.collection('admins').insertOne({
+            username,
+            password: hashedPassword,
+            // Add other properties as needed
+        });
+
+        res.status(201).json({ message: 'Admin user registered successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
+
+
 //login admin
 /**
  * @swagger
@@ -485,7 +557,7 @@ app.post('/admin/login', async (req, res) => {
 });
 
 
-// retrieve hsot data
+// retrieve host data
 /**
  * @swagger
  * /admin/dashboard:
