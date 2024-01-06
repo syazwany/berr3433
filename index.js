@@ -83,16 +83,325 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
+// Logout for user (requires a valid JWT)
 /**
  * @swagger
- * /create/host:
+ * /logout:
  *   post:
- *     summary: Create a new host account
+ *     summary: Logout and invalidate token
  *     tags:
- *       - Security
+ *       - Authentication
  *     security:
  *       - bearerAuth: []
- *     description: Create a new host account with the provided information.
+ *     responses:
+ *       '200':
+ *         description: Logout successful
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *       '401':
+ *         description: Unauthorized - invalid token or not provided
+ *         schema:
+ *           $ref: '#/definitions/Error'
+ *       '500':
+ *         description: An error occurred
+ *         schema:
+ *           $ref: '#/definitions/Error'
+ */
+
+const blacklistedTokens = new Set(); // Assuming this set keeps track of blacklisted tokens
+
+app.post('/logout', verifyToken, async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1]; // Extract token from header
+        blacklistedTokens.add(token); // Add the token to the blacklist/set
+        res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
+
+
+// Login for user
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Login a user
+ *     tags:
+ *       - Admin
+ *     requestBody:
+ *       description: User login details
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required:
+ *               - username
+ *               - password
+ *     responses:
+ *       '200':
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Login successful
+ *               token: <JWT_TOKEN>
+ *       '401':
+ *         description: Invalid password
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Invalid password
+ *       '404':
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: User not found
+ *       '500':
+ *         description: An error occurred during login
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred during login
+ */              
+app.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Find the user in the "users" collection
+        const user = await db.collection('users').findOne({ username });
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        // Compare the password
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordMatch) {
+            res.status(401).json({ message: 'Invalid password' });
+            return;
+        }
+
+        // // Insert into "visitors" collection
+        // await db.collection('visitors').insertOne({
+        //     name: 'Login Visitor',
+        //     email: 'login@visitor.com'
+        // });
+
+        // Generate a JSON Web Token (JWT)
+        const token = jwt.sign({ role: user.role }, 'secretKey');
+        console.log('Generated Token:', token);
+        res.status(200).json({ message: 'Login successful', token });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'An error occurred during login' });
+    }
+});
+
+// Create a new visitor (requires a valid JWT)
+/**
+ * @swagger
+ * /visitors:
+ *   post:
+ *     summary: Create a new visitor
+ *     description: Create a new visitor with the provided information.
+ *     tags:
+ *       - Visitors
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: Visitor's ID number
+ *               name:
+ *                 type: string
+ *                 description: Name of the visitor
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email of the visitor
+ *               purpose:
+ *                 type: string
+ *                 description: Purpose of the visit
+ *             required:
+ *               - name
+ *               - email
+ *               - purpose
+ *     responses:
+ *       '201':
+ *         description: Visitor created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *             example:
+ *               message: Visitor created successfully
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *             example:
+ *               message: An error occurred
+ */
+app.post('/visitors', verifyToken, async (req, res) => {
+    try {
+        const {
+            userId,
+            name,
+            email,
+            purpose
+        } = req.body;
+
+        const decodedToken = req.decoded;
+        if(decodedToken.role == "admin"){
+            // Insert into "visitors" collection
+            await db.collection('visitors').insertOne({
+                userId,
+                name,
+                email,
+                purpose
+            });
+            res.status(201).json({
+                message: 'Visitor created successfully'
+            });
+        } else {
+            res.status(401).json({ message: 'Unauthorized' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
+
+// Register a new user
+/**
+ * @swagger
+ *  /register:
+ *   post:
+ *     summary: Register a new user
+ *     tags:
+ *        - Admin 
+ *     requestBody:
+ *       description: User registration details
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *             required:
+ *               - username
+ *               - password
+ *               - email
+ *               - address
+ *     responses:
+ *       '201':
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: User registered successfully
+ *       '409':
+ *         description: User with this email already exists
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: User with this email already exists
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */ 
+app.post('/register', async (req, res) => {
+    try {
+        const {
+            username,
+            password,
+            email,
+            address
+        } = req.body;
+
+        // Check if the user already exists based on email
+        const existingUser = await db.collection('users').findOne({
+            email
+        });
+
+        if (existingUser) {
+            res.status(409).json({
+                message: 'User with this email already exists'
+            });
+            return;
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert the user into the "users" collection
+        await db.collection('users').insertOne({
+                username: username,
+                password: hashedPassword,
+                email: email,
+                address: address,
+                role: 'admin'
+            });
+
+        res.status(201).json({
+            message: 'User registered successfully'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'An error occurred'
+        });
+    }
+});
+
+// Register a new security
+/**
+ * @swagger
+ *  /register-security:
+ *   post:
+ *     summary: Register a new security
+ *     tags:
+ *       - Security
+ *     description: Register a new security entity with the provided information.
  *     requestBody:
  *       required: true
  *       content:
@@ -110,6 +419,421 @@ app.get('/', (req, res) => {
  *                 type: string
  *     responses:
  *       '201':
+ *         description: Security registered successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Security registered successfully
+ *       '409':
+ *         description: Security already exists
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Security already exists
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */
+app.post('/register-security', async (req, res) => {
+    try {
+        const {
+            name,
+            username,
+            password,
+            email
+        } = req.body;
+
+        // Check if the security already exists
+        const existingSecurity = await db.collection('security').findOne({
+            username
+        });
+        if (existingSecurity) {
+            res.status(409).json({
+                message: 'Security already exists'
+            });
+            return;
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert the security into the "security" collection
+        const result = await db
+            .collection('security')
+            .insertOne({
+                name,
+                username,
+                password: hashedPassword,
+                email
+            });
+
+        res.status(201).json({
+            message: 'Security registered successfully'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'An error occurred'
+        });
+    }
+});
+
+
+// View access info for a visitor
+/**
+ * @swagger
+ * /visitors/{name}/{email}/access:
+ *   get:
+ *     summary: Get access info for a visitor
+ *     tags:
+ *       - Visitors
+ *     parameters:
+ *       - name: name
+ *         in: path
+ *         required: true
+ *         type: string
+ *         description: The name of the visitor
+ *       - name: email
+ *         in: path
+ *         required: true
+ *         type: string
+ *         format: email
+ *         description: The email of the visitor
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         schema:
+ *           $ref: '#/definitions/Visitor'
+ *       '404':
+ *         description: Access information not found
+ *         schema:
+ *           $ref: '#/definitions/Error'
+ *       '500':
+ *         description: An error occurred
+ *         schema:
+ *           $ref: '#/definitions/Error'
+ * Visitor:
+ *   type: object
+ *   properties:
+ *     name:
+ *       type: string
+ *     email:
+ *       type: string    
+ * Error:
+ *   type: object
+ *   properties:
+ *     message:
+ *       type: string
+ */
+app.get('/visitors/:name/:email/access', async (req, res) => {
+    try {
+        const {
+            name,
+            email
+        } = req.params;
+
+        // Retrieve the access info for the visitor from the "visitors" collection
+        const visitors = await db.collection('visitors').findOne({
+            name,
+            email
+        });
+
+        if (!visitors) {
+            return res.status(404).json({
+                message: 'Access information not found'
+            });
+        }
+
+        res.status(200).json(visitors);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'An error occurred'
+        });
+    }
+});
+
+//retrieve all visitors
+/**
+ * @swagger
+ * /visitors:
+ *   get:
+ *     summary: "View visitors"
+ *     description: "Retrieve visitors based on user role"
+ *     tags:
+ *       - Staff & Visitors
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: "Visitors retrieved successfully"
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/Visitor'
+ *       '400':
+ *         description: "Invalid token or error in retrieving visitors"
+ *         schema:
+ *           $ref: '#/definitions/Error'
+ *       '401':
+ *         description: "Unauthorized - Invalid token or insufficient permissions"
+ *         schema:
+ *           $ref: '#/definitions/Error'
+ *     consumes:
+ *       - "application/json"
+ *     produces:
+ *       - "application/json"
+ * definitions:
+ *   Visitor:
+ *     type: object
+ *     properties:
+ *       name:
+ *         type: string
+ *       email:
+ *         type: string
+ *   Error:
+ *     type: object
+ *     properties:
+ *       message:
+ *         type: string
+ */
+app.get('/visitors', verifyToken, async (req, res) => {
+    try {
+        const decodedToken = req.decoded;
+        if (decodedToken.role === 'admin') {
+            // If the user is an admin, retrieve all visitors from the "visitors" collection
+            const visitors = await db.collection('visitors').find().toArray();
+            res.status(200).json(visitors);
+        } else {
+            // If the user is not an admin, send an unauthorized message
+            res.status(401).json({ message: 'Unauthorized' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
+
+ 
+// update visitor  
+/**
+ * @swagger
+ * /visitors/{userId}:
+ *   patch:
+ *     summary: Update Visitor
+ *     tags:
+ *       - Visitors
+ *     security:
+ *       - bearerAuth: []  # Requires a bearer token for authorization
+ *     description: Endpoint to update a visitor by user ID
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: ID of the visitor to be updated
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Name of the visitor
+ *               email:
+ *                 type: string
+ *                 description: Email of the visitor
+ *               purpose:
+ *                 type: string
+ *                 description: Purpose of the visit
+ *     responses:
+ *       '200':
+ *         description: Visitor updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Visitor updated successfully
+ *       '401':
+ *         description: Unauthorized - Requires admin role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Insufficient permissions
+ *       '404':
+ *         description: Visitor not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Visitor not found
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: An error occurred
+ */
+
+app.patch('/visitors/:userId', verifyToken, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { name, email, purpose } = req.body;
+
+        // Check if the user has admin role
+        if (req.decoded.role !== 'admin') {
+            res.status(401).json({ message: 'Unauthorized - Requires admin role' });
+            return;
+        }
+
+        // Update the visitor in the "visitors" collection
+        const result = await db.collection('visitors').updateOne(
+            { userId }, // Match based on userId
+            { $set: { name, email, purpose } } // Update fields
+        );
+
+        if (result.matchedCount === 1) {
+            res.status(200).json({ message: 'Visitor updated successfully' });
+        } else {
+            res.status(404).json({ message: 'Visitor not found' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
+
+//delete a visitor
+/**
+ * @swagger
+ * /visitors/{id}:
+ *   delete:
+ *     summary: Delete a visitor
+ *     description: Delete a visitor from the "visitors" collection by ID. Requires admin role.
+ *     tags:
+ *       - Visitors
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the visitor to be deleted
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Visitor deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *             example:
+ *               message: Visitor deleted successfully
+ *       '401':
+ *         description: Unauthorized - Requires admin role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *             example:
+ *               message: Unauthorized - Requires admin role
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *             example:
+ *               message: An error occurred
+ */
+
+app.delete('/visitors/:userId', verifyToken, async (req, res) => {
+    try {
+        const { userId } = req.params; // Extract the 'id' from req.params
+
+        // Check if the user has admin role
+        if (req.decoded.role !== 'admin') {
+            res.status(401).json({ message: 'Unauthorized - Requires admin role' });
+            return;
+        }
+
+        // Delete the visitor from the "visitors" collection using the ObjectId
+        const result = await db.collection('visitors').deleteOne({ userId });
+
+        if (result.deletedCount === 1) {
+            res.status(200).json({ message: 'Visitor deleted successfully' });
+        } else {
+            res.status(404).json({ message: 'Visitor not found' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
+
+// Public API for security to create a new host account with security approval
+/**
+ * @swagger
+ * /create/host:
+ *   post:
+ *     summary: Create a new host account with security approval
+ *     tags:
+ *       - Public API
+ *     security:
+ *       - bearerAuth: []  # Use the 'bearerAuth' security scheme for authentication
+ *     requestBody:
+ *       description: Host details for account creation
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *             required:
+ *               - name
+ *               - username
+ *               - password
+ *               - email
+ *     responses:
+ *       '201':
  *         description: Host account created successfully
  *         content:
  *           application/json:
@@ -121,8 +845,14 @@ app.get('/', (req, res) => {
  *           application/json:
  *             example:
  *               message: Unauthorized - Requires security role
+ *       '409':
+ *         description: Host already exists
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Host already exists
  *       '500':
- *         description: An error occurred
+ *         description: An error occurred during account creation
  *         content:
  *           application/json:
  *             example:
@@ -130,13 +860,13 @@ app.get('/', (req, res) => {
  */
 app.post('/create/host', verifyToken, async (req, res) => {
     try {
-        const { name, username, password, email } = req.body;
-
         // Check if the user has security role
         if (req.decoded.role !== 'security') {
             res.status(401).json({ message: 'Unauthorized - Requires security role' });
             return;
         }
+
+        const { name, username, password, email } = req.body;
 
         // Check if the host already exists
         const existingHost = await db.collection('hosts').findOne({ username });
@@ -164,15 +894,16 @@ app.post('/create/host', verifyToken, async (req, res) => {
     }
 });
 
+// Public API for testing without security approval (e.g., /create/test/host)
 /**
  * @swagger
  * /create/test/host:
  *   post:
- *     summary: Testing API without security approval
+ *     summary: Create a test host account without security approval
  *     tags:
- *       - Security
- *     description: Testing API to create a new host account without security approval.
+ *       - Public API
  *     requestBody:
+ *       description: Host details for test account creation
  *       required: true
  *       content:
  *         application/json:
@@ -187,15 +918,26 @@ app.post('/create/host', verifyToken, async (req, res) => {
  *                 type: string
  *               email:
  *                 type: string
+ *             required:
+ *               - name
+ *               - username
+ *               - password
+ *               - email
  *     responses:
  *       '201':
- *         description: Host account created successfully
+ *         description: Test Host account created successfully
  *         content:
  *           application/json:
  *             example:
- *               message: Host account created successfully (without security approval)
+ *               message: Test Host account created successfully
+ *       '409':
+ *         description: Host already exists
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Host already exists
  *       '500':
- *         description: An error occurred
+ *         description: An error occurred during test account creation
  *         content:
  *           application/json:
  *             example:
@@ -204,8 +946,6 @@ app.post('/create/host', verifyToken, async (req, res) => {
 app.post('/create/test/host', async (req, res) => {
     try {
         const { name, username, password, email } = req.body;
-
-        // For testing purposes, no security role check
 
         // Check if the host already exists
         const existingHost = await db.collection('hosts').findOne({ username });
@@ -226,37 +966,49 @@ app.post('/create/test/host', async (req, res) => {
             email
         });
 
-        res.status(201).json({ message: 'Host account created successfully (without security approval)' });
+        res.status(201).json({ message: 'Test Host account created successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
 });
 
+// Public API for authenticated host to see all created visitors
 /**
  * @swagger
  * /host/visitors:
  *   get:
- *     summary: View all visitors created by the authenticated host
+ *     summary: Retrieve all created visitors for an authenticated host
  *     tags:
- *       - Host
+ *       - Public API
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       '200':
- *         description: Visitors retrieved successfully
- *         schema:
- *           type: array
- *           items:
- *             $ref: '#/definitions/Visitor'
+ *         description: List of visitors retrieved successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               - userId: 1
+ *                 name: Visitor 1
+ *                 email: visitor1@example.com
+ *                 purpose: Meeting
+ *               - userId: 2
+ *                 name: Visitor 2
+ *                 email: visitor2@example.com
+ *                 purpose: Delivery
  *       '401':
  *         description: Unauthorized - Requires host role
- *         schema:
- *           $ref: '#/definitions/Error'
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Requires host role
  *       '500':
  *         description: An error occurred
- *         schema:
- *           $ref: '#/definitions/Error'
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
  */
 app.get('/host/visitors', verifyToken, async (req, res) => {
     try {
@@ -266,7 +1018,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
             return;
         }
 
-        // Retrieve visitors created by the authenticated host from the "visitors" collection
+        // Retrieve all visitors for the authenticated host from the "visitors" collection
         const visitors = await db.collection('visitors').find({ hostUsername: req.decoded.username }).toArray();
         res.status(200).json(visitors);
     } catch (error) {
@@ -275,17 +1027,18 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
     }
 });
 
+// Public API for authenticated host to issue a visitor pass
 /**
  * @swagger
  * /host/issue-pass:
  *   post:
- *     summary: Issue visitor pass
+ *     summary: Issue a visitor pass for an authenticated host
  *     tags:
- *       - Host
+ *       - Public API
  *     security:
  *       - bearerAuth: []
- *     description: Issue a visitor pass with the provided information.
  *     requestBody:
+ *       description: Visitor details for issuing a pass
  *       required: true
  *       content:
  *         application/json:
@@ -298,6 +1051,10 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  *                 type: string
  *               purpose:
  *                 type: string
+ *             required:
+ *               - name
+ *               - email
+ *               - purpose
  *     responses:
  *       '201':
  *         description: Visitor pass issued successfully
@@ -320,313 +1077,109 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  */
 app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
-        const { name, email, purpose } = req.body;
-
         // Check if the user has host role
         if (req.decoded.role !== 'host') {
             res.status(401).json({ message: 'Unauthorized - Requires host role' });
             return;
         }
 
-        // Insert the visitor pass into the "visitors" collection
-        await db.collection('visitors').insertOne({
+        const {
             name,
             email,
-            purpose,
-            hostUsername: req.decoded.username
+            purpose
+        } = req.body;
+
+        // Insert the visitor into the "visitors" collection
+        await db.collection('visitors').insertOne({
+            hostUsername: req.decoded.username,
+            name,
+            email,
+            purpose
         });
 
-        res.status(201).json({ message: 'Visitor pass issued successfully' });
+        res.status(201).json({
+            message: 'Visitor pass issued successfully'
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
 });
 
+// Public API for a visitor to retrieve the pass
 /**
  * @swagger
  * /visitor/pass:
  *   get:
- *     summary: Retrieve visitor pass
+ *     summary: Retrieve the pass for an authenticated visitor
  *     tags:
- *       - Visitor
- *     parameters:
- *       - name: name
- *         in: query
- *         required: true
- *         type: string
- *         description: Name of the visitor
- *       - name: email
- *         in: query
- *         required: true
- *         type: string
- *         format: email
- *         description: Email of the visitor
- *     responses:
- *       '200':
- *         description: Visitor pass retrieved successfully
- *         schema:
- *           $ref: '#/definitions/VisitorPass'
- *       '404':
- *         description: Visitor pass not found
- *         schema:
- *           $ref: '#/definitions/Error'
- *       '500':
- *         description: An error occurred
- *         schema:
- *           $ref: '#/definitions/Error'
- * definitions:
- *   VisitorPass:
- *     type: object
- *     properties:
- *       name:
- *         type: string
- *       email:
- *         type: string
- *       purpose:
- *         type: string
- *       hostUsername:
- *         type: string
- */
-app.get('/visitor/pass', async (req, res) => {
-    try {
-        const { name, email } = req.query;
-
-        // Retrieve the visitor pass from the "visitors" collection
-        const visitorPass = await db.collection('visitors').findOne({ name, email });
-
-        if (!visitorPass) {
-            return res.status(404).json({
-                message: 'Visitor pass not found'
-            });
-        }
-
-        res.status(200).json(visitorPass);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: 'An error occurred'
-        });
-    }
-});
-
-/**
- * @swagger
- *  /admin/register:
- *   post:
- *     summary: Register a new admin user
- *     tags:
- *       - Admin
- *     requestBody:
- *       description: Admin registration details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *             required:
- *               - username
- *               - password
- *     responses:
- *       '201':
- *         description: Admin user registered successfully
- *         content:
- *           application/json:
- *             example:
- *               message: Admin user registered successfully
- *       '409':
- *         description: Admin user with this username already exists
- *         content:
- *           application/json:
- *             example:
- *               message: Admin user with this username already exists
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- */
-app.post('/admin/register', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        // Check if the admin user already exists based on username
-        const existingAdmin = await db.collection('admins').findOne({ username });
-
-        if (existingAdmin) {
-            res.status(409).json({ message: 'Admin user with this username already exists' });
-            return;
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert the admin user into the "admins" collection
-        await db.collection('admins').insertOne({
-            username,
-            password: hashedPassword,
-            // Add other properties as needed
-        });
-
-        res.status(201).json({ message: 'Admin user registered successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
-    }
-});
-
-
-//login admin
-/**
- * @swagger
- * /admin/login:
- *   post:
- *     summary: Admin Login
- *     tags:
- *       - Admin
- *     requestBody:
- *       description: Admin login details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *             required:
- *               - username
- *               - password
- *     responses:
- *       '200':
- *         description: Login successful
- *         content:
- *           application/json:
- *             example:
- *               message: Login successful
- *               token: <JWT_TOKEN>
- *       '401':
- *         description: Invalid password or admin user not found
- *         content:
- *           application/json:
- *             example:
- *               message: Invalid password or admin user not found
- *       '500':
- *         description: An error occurred during login
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred during login
- */
-app.post('/admin/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        // Find the admin user in the "admins" collection
-        const adminUser = await db.collection('admins').findOne({ username });
-
-        if (!adminUser) {
-            res.status(401).json({ message: 'Invalid password or admin user not found' });
-            return;
-        }
-
-        // Compare the password
-        const isPasswordMatch = await bcrypt.compare(password, adminUser.password);
-
-        if (!isPasswordMatch) {
-            res.status(401).json({ message: 'Invalid password or admin user not found' });
-            return;
-        }
-
-        // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: adminUser.role, username: adminUser.username }, 'secretKey');
-        console.log('Generated Token:', token);
-        res.status(200).json({ message: 'Login successful', token });
-    } catch (error) {
-        console.error('Admin Login error:', error);
-        res.status(500).json({ message: 'An error occurred during login' });
-    }
-});
-
-
-// retrieve host data
-/**
- * @swagger
- * /admin/dashboard:
- *   get:
- *     summary: Admin Dashboard - Retrieve all host data
- *     tags:
- *       - Admin
+ *       - Public API
  *     security:
- *       - bearerAuth: []  # Requires a bearer token for authorization
+ *       - bearerAuth: []
  *     responses:
  *       '200':
- *         description: Host data retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/definitions/Host'
- *       '401':
- *         description: Unauthorized - Requires admin role
+ *         description: Pass retrieved successfully
  *         content:
  *           application/json:
  *             example:
- *               message: Unauthorized - Requires admin role
+ *               hostUsername: sampleHost
+ *               name: Sample Visitor
+ *               email: sample@visitor.com
+ *               purpose: Business meeting
+ *       '401':
+ *         description: Unauthorized - Requires visitor role
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Requires visitor role
+ *       '404':
+ *         description: Pass not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Pass not found
  *       '500':
  *         description: An error occurred
  *         content:
  *           application/json:
  *             example:
  *               message: An error occurred
- * definitions:
- *   Host:
- *     type: object
- *     properties:
- *       name:
- *         type: string
- *       username:
- *         type: string
- *       email:
- *         type: string
  */
-app.get('/admin/dashboard', verifyToken, async (req, res) => {
+app.get('/visitor/pass', verifyToken, async (req, res) => {
     try {
-        // Check if the user has admin role
-        if (req.decoded.role !== 'admin') {
-            res.status(401).json({ message: 'Unauthorized - Requires admin role' });
+        // Check if the user has visitor role
+        if (req.decoded.role !== 'visitor') {
+            res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
             return;
         }
 
-        // Retrieve all host data from the "hosts" collection
-        const hosts = await db.collection('hosts').find().toArray();
-        res.status(200).json(hosts);
+        // Retrieve the pass for the authenticated visitor from the "visitors" collection
+        const pass = await db.collection('visitors').findOne({ email: req.decoded.email });
+        
+        if (!pass) {
+            res.status(404).json({ message: 'Pass not found' });
+            return;
+        }
+
+        res.status(200).json(pass);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
 });
 
+// Additional API to manage account roles by an authenticated administrator
 /**
  * @swagger
  * /admin/manage-roles:
  *   patch:
- *     summary: Manage account roles
+ *     summary: Manage account roles by an authenticated administrator
  *     tags:
  *       - Admin
  *     security:
  *       - bearerAuth: []
- *     description: Update the account role for a user (security/host) by an authenticated admin
  *     requestBody:
+ *       description: Account role details
  *       required: true
  *       content:
  *         application/json:
@@ -637,7 +1190,6 @@ app.get('/admin/dashboard', verifyToken, async (req, res) => {
  *                 type: string
  *               role:
  *                 type: string
- *                 enum: [security, host]
  *             required:
  *               - username
  *               - role
@@ -652,18 +1204,20 @@ app.get('/admin/dashboard', verifyToken, async (req, res) => {
  *         description: Unauthorized - Requires admin role
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Insufficient permissions
- *       '404':
- *         description: User not found
+ *             example:
+ *               message: Unauthorized - Requires admin role
+ *       '400':
+ *         description: Invalid role specified
  *         content:
  *           application/json:
  *             example:
- *               message: User not found
+ *               message: Invalid role specified
+ *       '404':
+ *         description: Account not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Account not found
  *       '500':
  *         description: An error occurred
  *         content:
@@ -681,212 +1235,81 @@ app.patch('/admin/manage-roles', verifyToken, async (req, res) => {
             return;
         }
 
-        // Update the account role in the respective collection (security/host)
-        const collectionName = role === 'security' ? 'security' : 'hosts';
-
-        // Check if the user exists in the specified collection
-        const user = await db.collection(collectionName).findOne({ username });
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
+        // Validate that the role is either 'security' or 'host'
+        if (role !== 'security' && role !== 'host') {
+            res.status(400).json({ message: 'Invalid role specified' });
             return;
         }
 
-        // Update the user's role
-        await db.collection(collectionName).updateOne(
+        // Update the account role in the respective collection (security/host)
+        const collectionName = role === 'security' ? 'security' : 'hosts';
+        const result = await db.collection(collectionName).updateOne(
             { username },
             { $set: { role } }
         );
 
-        res.status(200).json({ message: 'Account role updated successfully' });
+        if (result.matchedCount === 1) {
+            res.status(200).json({ message: 'Account role updated successfully' });
+        } else {
+            res.status(404).json({ message: 'Account not found' });
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
 });
 
+
+// Additional API to manage account roles by an authenticated administrator
 /**
  * @swagger
- * /visitor/check-in:
- *   post:
- *     summary: Visitor check-in
+ * /admin/manage-roles:
+ *   patch:
+ *     summary: Manage account roles by an authenticated administrator
  *     tags:
- *       - Visitor
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *     responses:
- *       '200':
- *         description: Visitor checked in successfully
- *         content:
- *           application/json:
- *             example:
- *               message: Visitor checked in successfully
- *       '404':
- *         description: Visitor not found
- *         content:
- *           application/json:
- *             example:
- *               message: Visitor not found
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- */
-app.post('/visitor/check-in', async (req, res) => {
-    try {
-        const {
-            name,
-            email
-        } = req.body;
-
-        // Find the visitor in the "visitors" collection
-        const visitor = await db.collection('visitors').findOne({
-            name,
-            email
-        });
-
-        if (!visitor) {
-            return res.status(404).json({
-                message: 'Visitor not found'
-            });
-        }
-
-        // Perform check-in actions (e.g., update the visitor status in the database)
-
-        res.status(200).json({
-            message: 'Visitor checked in successfully'
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: 'An error occurred'
-        });
-    }
-});
-
-/**
- * @swagger
- * /visitor/check-out:
- *   post:
- *     summary: Visitor check-out
- *     tags:
- *       - Visitor
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *     responses:
- *       '200':
- *         description: Visitor checked out successfully
- *         content:
- *           application/json:
- *             example:
- *               message: Visitor checked out successfully
- *       '404':
- *         description: Visitor not found
- *         content:
- *           application/json:
- *             example:
- *               message: Visitor not found
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- */
-app.post('/visitor/check-out', async (req, res) => {
-    try {
-        const {
-            name,
-            email
-        } = req.body;
-
-        // Find the visitor in the "visitors" collection
-        const visitor = await db.collection('visitors').findOne({
-            name,
-            email
-        });
-
-        if (!visitor) {
-            return res.status(404).json({
-                message: 'Visitor not found'
-            });
-        }
-
-        // Perform check-out actions (e.g., update the visitor status in the database)
-
-        res.status(200).json({
-            message: 'Visitor checked out successfully'
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: 'An error occurred'
-        });
-    }
-});
-
-/**
- * @swagger
- * /host/revoke-pass:
- *   post:
- *     summary: Revoke visitor pass
- *     tags:
- *       - Host
+ *       - Admin
  *     security:
  *       - bearerAuth: []
  *     requestBody:
+ *       description: Account role details
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               username:
  *                 type: string
- *               email:
+ *               role:
  *                 type: string
+ *             required:
+ *               - username
+ *               - role
  *     responses:
  *       '200':
- *         description: Visitor pass revoked successfully
+ *         description: Account role updated successfully
  *         content:
  *           application/json:
  *             example:
- *               message: Visitor pass revoked successfully
+ *               message: Account role updated successfully
  *       '401':
- *         description: Unauthorized - Requires host role
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Insufficient permissions
- *       '404':
- *         description: Visitor not found
+ *         description: Unauthorized - Requires admin role
  *         content:
  *           application/json:
  *             example:
- *               message: Visitor not found
+ *               message: Unauthorized - Requires admin role
+ *       '400':
+ *         description: Invalid role specified
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Invalid role specified
+ *       '404':
+ *         description: Account not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Account not found
  *       '500':
  *         description: An error occurred
  *         content:
@@ -894,41 +1317,37 @@ app.post('/visitor/check-out', async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-app.post('/host/revoke-pass', verifyToken, async (req, res) => {
+app.patch('/admin/manage-roles', verifyToken, async (req, res) => {
     try {
-        const decodedToken = req.decoded;
-        if (decodedToken.role === 'host') {
-            const {
-                name,
-                email
-            } = req.body;
+        const { username, role } = req.body;
 
-            // Find the visitor in the "visitors" collection
-            const visitor = await db.collection('visitors').findOne({
-                name,
-                email
-            });
+        // Check if the user has admin role
+        if (req.decoded.role !== 'admin') {
+            res.status(401).json({ message: 'Unauthorized - Requires admin role' });
+            return;
+        }
 
-            if (!visitor) {
-                return res.status(404).json({
-                    message: 'Visitor not found'
-                });
-            }
+        // Validate that the role is either 'security' or 'host'
+        if (role !== 'security' && role !== 'host') {
+            res.status(400).json({ message: 'Invalid role specified' });
+            return;
+        }
 
-            // Perform pass revocation actions (e.g., remove the visitor from the database)
+        // Update the account role in the respective collection (security/host)
+        const collectionName = role === 'security' ? 'security' : 'hosts';
+        const result = await db.collection(collectionName).updateOne(
+            { username },
+            { $set: { role } }
+        );
 
-            res.status(200).json({
-                message: 'Visitor pass revoked successfully'
-            });
+        if (result.matchedCount === 1) {
+            res.status(200).json({ message: 'Account role updated successfully' });
         } else {
-            // If the user is not a host, send an unauthorized message
-            res.status(401).json({ message: 'Unauthorized - Requires host role' });
+            res.status(404).json({ message: 'Account not found' });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({
-            message: 'An error occurred'
-        });
+        res.status(500).json({ message: 'An error occurred' });
     }
 });
 
@@ -942,3 +1361,4 @@ try {
     console.error('Error connecting to MongoDB:', error);
     // Handle any errors related to MongoDB connection here
 }
+
