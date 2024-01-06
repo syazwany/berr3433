@@ -1035,8 +1035,6 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  *     summary: Issue a visitor pass for an authenticated host
  *     tags:
  *       - Host
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       description: Visitor details for issuing a pass
  *       required: true
@@ -1114,8 +1112,6 @@ app.post('/host/issue-pass', async (req, res) => {
  *     summary: Retrieve the pass for an authenticated visitor
  *     tags:
  *       - Visitor
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       '200':
  *         description: Pass retrieved successfully
