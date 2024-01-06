@@ -72,7 +72,7 @@ function verifyToken(req, res, next) {
         // Additional debugging
         console.log('Required Role:', 'security');
         console.log('Actual Role:', decoded.role);
-        
+
         // Assuming the role is stored in the token payload
         const decodedToken = jwt.decode(token);
 
@@ -233,7 +233,7 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ message: 'An error occurred during login' });
     }
 
-        const token = jwt.sign({ role: security }, 'secretKey');
+        const token = jwt.sign({ role: security.role }, 'secretKey');
          console.log('Generated Token:', token);
         res.status(201).json({ message: 'Host account created successfully' });
     
