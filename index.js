@@ -9,7 +9,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 const { ObjectID } = require('mongodb');
 
-
 // MongoDB connection URL
 const url = 'mongodb+srv://wany:wany123@wany.ccwpslo.mongodb.net/?retryWrites=true&w=majority';
 const dbName = 'VisitorManagementSystem'; // database name
@@ -49,7 +48,6 @@ const swaggerSpec = swaggerJsdoc(option);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
-
 // Middleware to verify JWT
 function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -68,25 +66,6 @@ function verifyToken(req, res, next) {
         }
 
         console.log('Decoded token:', decoded);
-
-        // Additional debugging
-        console.log('Required Role:', 'security');
-        console.log('Actual Role:', decoded.role);
-
-        // Assuming the role is stored in the token payload
-        const decodedToken = jwt.decode(token);
-
-         if (!decodedToken || !decodedToken.role || decodedToken.role !== 'security') {
-         return res.status(401).json({ message: 'Unauthorized - Requires security role' });
-        }
-
-        //if (decoded.role !== 'security') {
-          //  res.status(401).json({ message: 'Unauthorized - Requires security role' });
-            //return;
-        //}
-
-
-       // console.log('Decoded token:', decoded); (ori)
         req.decoded = decoded; // Set decoded token in request object
         next(); // Proceed to the next middleware
     });
@@ -103,7 +82,6 @@ MongoClient.connect(url)
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
-
 
 // Logout for user (requires a valid JWT)
 /**
@@ -147,17 +125,15 @@ app.post('/logout', verifyToken, async (req, res) => {
 });
 
 
-
 // Login for user
 /**
  * @swagger
  * /login:
  *   post:
- *     summary: Login a user
+ *     summary: Log in as a host
  *     tags:
- *       - Admin
+ *       - Hosts
  *     requestBody:
- *       description: User login details
  *       required: true
  *       content:
  *         application/json:
@@ -178,65 +154,46 @@ app.post('/logout', verifyToken, async (req, res) => {
  *           application/json:
  *             example:
  *               message: Login successful
- *               token: <JWT_TOKEN>
  *       '401':
- *         description: Invalid password
+ *         description: Invalid password or host not found
  *         content:
  *           application/json:
  *             example:
- *               message: Invalid password
- *       '404':
- *         description: User not found
- *         content:
- *           application/json:
- *             example:
- *               message: User not found
+ *               message: Invalid password or host not found
  *       '500':
- *         description: An error occurred during login
+ *         description: An error occurred
  *         content:
  *           application/json:
  *             example:
- *               message: An error occurred during login
- */              
+ *               message: An error occurred
+ */
 app.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // Find the user in the "users" collection
-        const user = await db.collection('users').findOne({ username });
+        // Find the host in the "hosts" collection
+        const host = await db.collection('hosts').findOne({ username });
 
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
+        if (!host) {
+            res.status(404).json({ message: 'Host not found' });
             return;
         }
 
         // Compare the password
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        const isPasswordMatch = await bcrypt.compare(password, host.password);
 
         if (!isPasswordMatch) {
             res.status(401).json({ message: 'Invalid password' });
             return;
         }
 
-        // // Insert into "visitors" collection
-        // await db.collection('visitors').insertOne({
-        //     name: 'Login Visitor',
-        //     email: 'login@visitor.com'
-        // });
+        // Your authentication logic goes here (e.g., generate a token)
 
-        // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: user.role }, 'secretKey');
-         console.log('Generated Token:', token);
-        res.status(200).json({ message: 'Login successful', token });
+        res.status(200).json({ message: 'Login successful' });
     } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ message: 'An error occurred during login' });
+        console.error('Error during login:', error);
+        res.status(500).json({ message: 'An error occurred' });
     }
-
-        const token = jwt.sign({ role: 'security' }, 'secretKey');
-         console.log('Generated Token:', token);
-        res.status(201).json({ message: 'Host account created successfully' });
-    
 });
 
 
@@ -328,7 +285,6 @@ app.post('/visitors', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
-
 
 // Register a new user
 /**
@@ -423,7 +379,6 @@ app.post('/register', async (req, res) => {
     }
 });
 
-
 // Register a new security
 /**
  * @swagger
@@ -511,7 +466,6 @@ app.post('/register-security', async (req, res) => {
         });
     }
 });
-
 
 
 // View access info for a visitor
@@ -755,7 +709,6 @@ app.patch('/visitors/:userId', verifyToken, async (req, res) => {
     }
 });
 
-
 //delete a visitor
 /**
  * @swagger
@@ -834,113 +787,6 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
     }
 });
 
-// Public API for security to create a new host account (e.g., /create/host):
-/**
- * @swagger
- * /create/host:
- *   post:
- *     summary: Create a new host account
- *     tags:
- *       - Hosts
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *               email:
- *                 type: string
- *             required:
- *               - name
- *               - username
- *               - password
- *               - email
- *     responses:
- *       '201':
- *         description: Host account created successfully
- *         content:
- *           application/json:
- *             example:
- *               message: Host account created successfully
- *       '409':
- *         description: Host account already exists
- *         content:
- *           application/json:
- *             example:
- *               message: Host account already exists
- *       '401':
- *         description: Unauthorized - Requires security role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires security role
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- */
-app.post('/create/host', verifyToken, async (req, res) => {
-    try {
-        // Ensure that the user has the "security" role
-        if (req.decoded.role !== 'security') {
-            return res.status(401).json({
-                message: 'Unauthorized - Requires security role'
-            });
-        }
-
-        const {
-            name,
-            username,
-            password,
-            email
-        } = req.body;
-
-        // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({
-            username
-        });
-
-        if (existingHost) {
-            return res.status(409).json({
-                message: 'Host account already exists'
-            });
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert the host into the "hosts" collection
-        await db.collection('hosts').insertOne({
-            name,
-            username,
-            password: hashedPassword,
-            email
-        });
-
-        return res.status(201).json({
-            message: 'Host account created successfully'
-        });
-    } catch (error) {
-        console.error('Error creating host account:', error);
-        return res.status(500).json({
-            message: 'An error occurred'
-        });
-    }
-});
-
-
-// Testing API without security approval (e.g., /create/test/host):
 /**
  * @swagger
  * /create/test/host:
@@ -982,16 +828,7 @@ app.post('/create/test/host', async (req, res) => {
         // Extract host information from the request body
         const { name, username, password, email } = req.body;
 
-       // Hash the password
-       const hashedPassword = await bcrypt.hash(password, 10);
-
-       // Insert the new test host into the "hosts" collection
-       await db.collection('hosts').insertOne({
-           name,
-           username,
-           password: hashedPassword,
-           email
-       });
+        // TODO: Add logic to create a new test host account (insert into the database)
 
         res.status(201).json({ message: 'Test host account created successfully' });
     } catch (error) {
@@ -1000,7 +837,6 @@ app.post('/create/test/host', async (req, res) => {
     }
 });
 
-
 //Start the server
 try {
     app.listen(port, () => {
@@ -1008,5 +844,6 @@ try {
     });
 } catch (error) {
     console.error('Error connecting to MongoDB:', error);
-    // Handle any errors related to MongoDB connection here
+    // Handle any errors related to MongoDB connection here
 }
+
