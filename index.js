@@ -72,11 +72,18 @@ function verifyToken(req, res, next) {
         // Additional debugging
         console.log('Required Role:', 'security');
         console.log('Actual Role:', decoded.role);
+        
+        // Assuming the role is stored in the token payload
+        const decodedToken = jwt.decode(token);
 
-        if (decoded.role !== 'security') {
-            res.status(401).json({ message: 'Unauthorized - Requires security role' });
-            return;
+         if (!decodedToken || !decodedToken.role || decodedToken.role !== 'security') {
+         return res.status(401).json({ message: 'Unauthorized - Requires security role' });
         }
+
+        //if (decoded.role !== 'security') {
+          //  res.status(401).json({ message: 'Unauthorized - Requires security role' });
+            //return;
+        //}
 
 
        // console.log('Decoded token:', decoded); (ori)
