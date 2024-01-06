@@ -901,7 +901,7 @@ app.post('/create/host', verifyToken, async (req, res) => {
  *   post:
  *     summary: Create a test host account without security approval
  *     tags:
- *       - Public API
+ *       - Testing
  *     requestBody:
  *       description: Host details for test account creation
  *       required: true
@@ -980,7 +980,7 @@ app.post('/create/test/host', async (req, res) => {
  *   get:
  *     summary: Retrieve all created visitors for an authenticated host
  *     tags:
- *       - Public API
+ *       - Visitor
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -1034,7 +1034,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  *   post:
  *     summary: Issue a visitor pass for an authenticated host
  *     tags:
- *       - Public API
+ *       - Host
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -1113,7 +1113,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  *   get:
  *     summary: Retrieve the pass for an authenticated visitor
  *     tags:
- *       - Public API
+ *       - Visitor
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -1350,6 +1350,89 @@ app.patch('/admin/manage-roles', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
+// Administrator login page (dump all host data upon successful login)
+/**
+ * @swagger
+ * /admin/login:
+ *   post:
+ *     summary: Administrator Login
+ *     tags:
+ *       - Admin
+ *     requestBody:
+ *       description: Administrator login details
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required:
+ *               - username
+ *               - password
+ *     responses:
+ *       '200':
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Login successful
+ *               token: <JWT_TOKEN>
+ *               hosts:
+ *                 - host1
+ *                 - host2
+ *                 - host3
+ *       '401':
+ *         description: Invalid password or admin user not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Invalid password or admin user not found
+ *       '500':
+ *         description: An error occurred during login
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred during login
+ */
+app.post('/admin/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Find the admin user in the "admins" collection
+        const adminUser = await db.collection('admins').findOne({ username });
+
+        if (!adminUser) {
+            res.status(401).json({ message: 'Invalid password or admin user not found' });
+            return;
+        }
+
+        // Compare the password
+        const isPasswordMatch = await bcrypt.compare(password, adminUser.password);
+
+        if (!isPasswordMatch) {
+            res.status(401).json({ message: 'Invalid password or admin user not found' });
+            return;
+        }
+
+        // Generate a JSON Web Token (JWT)
+        const token = jwt.sign({ role: adminUser.role, username: adminUser.username }, 'secretKey');
+
+        // Retrieve all host data from the "hosts" collection
+        const hosts = await db.collection('hosts').find().toArray();
+
+        console.log('Generated Token:', token);
+        res.status(200).json({ message: 'Login successful', token, hosts });
+    } catch (error) {
+        console.error('Admin Login error:', error);
+        res.status(500).json({ message: 'An error occurred during login' });
+    }
+});
+
 
 
 //Start the server
