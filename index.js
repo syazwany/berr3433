@@ -830,12 +830,13 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
 // Public API for security to create a new host account (e.g., /create/host):
 /**
  * @swagger
- * /create/host:
+ *  /create/host:
  *   post:
  *     summary: Create a new host account
  *     tags:
- *       - Security
- *     description: Create a new host account with the provided information.
+ *       - Hosts
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -851,16 +852,16 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
  *                 type: string
  *               email:
  *                 type: string
+ *             required:
+ *               - name
+ *               - username
+ *               - password
+ *               - email
  *     responses:
  *       '201':
  *         description: Host account created successfully
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
  *             example:
  *               message: Host account created successfully
  *       '409':
@@ -876,7 +877,7 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-app.post('/create/host', async (req, res) => {
+app.post('/create/host', verifyToken, async (req, res) => {
     try {
         const {
             name,
@@ -890,10 +891,10 @@ app.post('/create/host', async (req, res) => {
             username
         });
         if (existingHost) {
-            res.status(409).json({
+           return  res.status(409).json({
                 message: 'Host account already exists'
             });
-            return;
+            
         }
 
         // Hash the password
@@ -911,8 +912,8 @@ app.post('/create/host', async (req, res) => {
             message: 'Host account created successfully'
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
+        console.error('Error creating host account:', error);
+        return res.status(500).json({
             message: 'An error occurred'
         });
     }
