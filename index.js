@@ -68,6 +68,18 @@ function verifyToken(req, res, next) {
         }
 
         console.log('Decoded token:', decoded);
+
+        // Additional debugging
+        console.log('Required Role:', 'security');
+        console.log('Actual Role:', decoded.role);
+
+        if (decoded.role !== 'security') {
+            res.status(401).json({ message: 'Unauthorized - Requires security role' });
+            return;
+        }
+
+
+       // console.log('Decoded token:', decoded); (ori)
         req.decoded = decoded; // Set decoded token in request object
         next(); // Proceed to the next middleware
     });
