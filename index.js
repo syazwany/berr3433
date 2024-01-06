@@ -835,8 +835,7 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
  *     summary: Create a new host account
  *     tags:
  *       - Security
- *     security:
- *       - bearerAuth: []
+ *     description: Create a new host account with the provided information.
  *     requestBody:
  *       required: true
  *       content:
@@ -857,14 +856,19 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
  *         description: Host account created successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *             example:
  *               message: Host account created successfully
- *       '401':
- *         description: Unauthorized - Invalid token or insufficient permissions
+ *       '409':
+ *         description: Host account already exists
  *         content:
  *           application/json:
  *             example:
- *               message: Unauthorized - Invalid token or insufficient permissions
+ *               message: Host account already exists
  *       '500':
  *         description: An error occurred
  *         content:
@@ -872,35 +876,47 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-app.post('/create/host', verifyToken, async (req, res) => {
+app.post('/create/host', async (req, res) => {
     try {
-        // Check if the user has security role
-        if (req.decoded.role !== 'security') {
-            res.status(401).json({ message: 'Unauthorized - Requires security role' });
+        const {
+            name,
+            username,
+            password,
+            email
+        } = req.body;
+
+        // Check if the host already exists
+        const existingHost = await db.collection('hosts').findOne({
+            username
+        });
+        if (existingHost) {
+            res.status(409).json({
+                message: 'Host account already exists'
+            });
             return;
         }
 
-        // Extract host information from the request body
-        const { name, username, password, email } = req.body;
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-       // Hash the password
-       const hashedPassword = await bcrypt.hash(password, 10);
+        // Insert the host into the "hosts" collection
+        const result = await db.collection('hosts').insertOne({
+            name,
+            username,
+            password: hashedPassword,
+            email
+        });
 
-       // Insert the new host into the "hosts" collection
-       await db.collection('hosts').insertOne({
-           name,
-           username,
-           password: hashedPassword,
-           email
-       });
-
-        res.status(201).json({ message: 'Host account created successfully' });
+        res.status(201).json({
+            message: 'Host account created successfully'
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).json({
+            message: 'An error occurred'
+        });
     }
 });
-
 // Testing API without security approval (e.g., /create/test/host):
 /**
  * @swagger
