@@ -894,6 +894,81 @@ app.post('/create/host', verifyToken, async (req, res) => {
     }
 });
 
+// Public API for host login and token generation
+/**
+ * @swagger
+ * /host/login:
+ *   post:
+ *     summary: Host Login
+ *     tags:
+ *       - Host
+ *     requestBody:
+ *       description: Host login details
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required:
+ *               - username
+ *               - password
+ *     responses:
+ *       '200':
+ *         description: Login successful, returns token
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Login successful
+ *               token: <JWT_TOKEN>
+ *       '401':
+ *         description: Invalid password or host user not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Invalid password or host user not found
+ *       '500':
+ *         description: An error occurred during login
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred during login
+ */
+app.post('/host/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Find the host user in the "hosts" collection
+        const hostUser = await db.collection('hosts').findOne({ username });
+
+        if (!hostUser) {
+            res.status(401).json({ message: 'Invalid password or host user not found' });
+            return;
+        }
+
+        // Compare the password
+        const isPasswordMatch = await bcrypt.compare(password, hostUser.password);
+
+        if (!isPasswordMatch) {
+            res.status(401).json({ message: 'Invalid password or host user not found' });
+            return;
+        }
+
+        // Generate a JSON Web Token (JWT) for the host
+        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
+        console.log('Generated Token:', token);
+        
+        res.status(200).json({ message: 'Login successful', token });
+    } catch (error) {
+        console.error('Host Login error:', error);
+        res.status(500).json({ message: 'An error occurred during login' });
+    }
+});
+
 // Public API for testing without security approval (e.g., /create/test/host)
 /**
  * @swagger
@@ -1038,6 +1113,8 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  *     summary: Issue a visitor pass for an authenticated host
  *     tags:
  *       - Host
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       description: Visitor details for issuing a pass
  *       required: true
@@ -1076,7 +1153,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  *             example:
  *               message: An error occurred
  */
-app.post('/host/issue-pass', async (req, res) => {
+app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
         if (req.decoded.role !== 'host') {
