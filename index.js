@@ -209,95 +209,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-/* // Create a new visitor (requires a valid JWT)
-/**
- * @swagger
- * /visitors:
- *   post:
- *     summary: Create a new visitor
- *     description: Create a new visitor with the provided information.
- *     tags:
- *       - Visitors
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               userId:
- *                 type: string
- *                 description: Visitor's ID number
- *               name:
- *                 type: string
- *                 description: Name of the visitor
- *               email:
- *                 type: string
- *                 format: email
- *                 description: Email of the visitor
- *               purpose:
- *                 type: string
- *                 description: Purpose of the visit
- *             required:
- *               - name
- *               - email
- *               - purpose
- *     responses:
- *       '201':
- *         description: Visitor created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *             example:
- *               message: Visitor created successfully
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *             example:
- *               message: An error occurred
- */ 
-/*app.post('/visitors', verifyToken, async (req, res) => {
-    try {
-        const {
-            userId,
-            name,
-            email,
-            purpose
-        } = req.body;
-
-        const decodedToken = req.decoded;
-        if(decodedToken.role == "admin"){
-            // Insert into "visitors" collection
-            await db.collection('visitors').insertOne({
-                userId,
-                name,
-                email,
-                purpose
-            });
-            res.status(201).json({
-                message: 'Visitor created successfully'
-            });
-        } else {
-            res.status(401).json({ message: 'Unauthorized' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
-    }
-}); */
-
 // Register a new Admin
 /**
  * @swagger
@@ -388,97 +299,6 @@ app.post('/register', async (req, res) => {
         res.status(500).json({
             message: 'An error occurred'
         });
-    }
-});
-
-// Additional API to manage account roles by an authenticated administrator
-/**
- * @swagger
- * /admin/manage-roles:
- *   patch:
- *     summary: Manage account roles by an authenticated administrator
- *     tags:
- *       - Admin
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       description: Account role details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               role:
- *                 type: string
- *             required:
- *               - username
- *               - role
- *     responses:
- *       '200':
- *         description: Account role updated successfully
- *         content:
- *           application/json:
- *             example:
- *               message: Account role updated successfully
- *       '401':
- *         description: Unauthorized - Requires admin role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires admin role
- *       '400':
- *         description: Invalid role specified
- *         content:
- *           application/json:
- *             example:
- *               message: Invalid role specified
- *       '404':
- *         description: Account not found
- *         content:
- *           application/json:
- *             example:
- *               message: Account not found
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
- */
-app.patch('/admin/manage-roles', verifyToken, async (req, res) => {
-    try {
-        const { username, role } = req.body;
-
-        // Check if the user has admin role
-        if (req.decoded.role !== 'admin') {
-            res.status(401).json({ message: 'Unauthorized - Requires admin role' });
-            return;
-        }
-
-        // Validate that the role is either 'security' or 'host'
-        if (role !== 'security' && role !== 'host') {
-            res.status(400).json({ message: 'Invalid role specified' });
-            return;
-        }
-
-        // Update the account role in the respective collection (security/host)
-        const collectionName = role === 'security' ? 'security' : 'hosts';
-        const result = await db.collection(collectionName).updateOne(
-            { username },
-            { $set: { role } }
-        );
-
-        if (result.matchedCount === 1) {
-            res.status(200).json({ message: 'Account role updated successfully' });
-        } else {
-            res.status(404).json({ message: 'Account not found' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
     }
 });
 
@@ -904,11 +724,14 @@ app.get('/security/retrieve-contact/:passIdentifier', verifyToken, async (req, r
  *                 type: string
  *               email:
  *                 type: string
+ *               phoneNumber
+ *                  type: string
  *             required:
  *               - name
  *               - username
  *               - password
  *               - email
+ *               - phoneNumber
  *     responses:
  *       '201':
  *         description: Host account created successfully
@@ -943,7 +766,7 @@ app.post('/create/host', verifyToken, async (req, res) => {
             return;
         }
 
-        const { name, username, password, email } = req.body;
+        const { name, username, password, email, phoneNumber } = req.body;
 
         // Check if the host already exists
         const existingHost = await db.collection('hosts').findOne({ username });
@@ -961,7 +784,8 @@ app.post('/create/host', verifyToken, async (req, res) => {
             name,
             username,
             password: hashedPassword,
-            email
+            email,
+            phoneNUmber
         });
 
         res.status(201).json({ message: 'Host account created successfully' });
@@ -1070,11 +894,14 @@ app.post('/host/login', async (req, res) => {
  *                 type: string
  *               email:
  *                 type: string
+ *               phoneNumber:
+ *                 type: string
  *             required:
  *               - name
  *               - username
  *               - password
  *               - email
+ *               - phoneNumber
  *     responses:
  *       '201':
  *         description: Test Host account created successfully
@@ -1097,7 +924,7 @@ app.post('/host/login', async (req, res) => {
  */
 app.post('/create/test/host', async (req, res) => {
     try {
-        const { name, username, password, email } = req.body;
+        const { name, username, password, email, phoneNumber } = req.body;
 
         // Check if the host already exists
         const existingHost = await db.collection('hosts').findOne({ username });
@@ -1115,7 +942,8 @@ app.post('/create/test/host', async (req, res) => {
             name,
             HostUsername,
             password: hashedPassword,
-            email
+            email,
+            phoneNumber
         });
 
         res.status(201).json({ message: 'Test Host account created successfully' });
