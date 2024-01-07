@@ -688,7 +688,7 @@ app.get('/security/retrieve-contact/:passIdentifier', verifyToken, async (req, r
 
         // Return only the host's contact information to the public
         const hostContact = {
-            name: visitorPass.hostUsername,
+            name: visitorPass.HostUsername,
             // Add more host contact information fields as needed
         };
 
@@ -841,7 +841,7 @@ app.post('/host/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Find the host user in the "hosts" collection
-        const HostUser = await db.collection('hosts').findOne({ username });
+        const hostUser = await db.collection('hosts').findOne({ username });
 
         if (!hostUser) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -849,7 +849,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Compare the password
-        const isPasswordMatch = await bcrypt.compare(password, HostUser.password);
+        const isPasswordMatch = await bcrypt.compare(password, hostUser.password);
 
         if (!isPasswordMatch) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -857,7 +857,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: HostUser.role, username: HostUser.username }, 'secretKey');
+        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
         console.log('Generated Token:', token);
         
         res.status(200).json({ message: 'Login successful', token });
@@ -937,7 +937,7 @@ app.post('/create/test/host', async (req, res) => {
         // Insert the host into the "hosts" collection
         await db.collection('hosts').insertOne({
             name,
-            HostUsername,
+            username,
             password: hashedPassword,
             email,
             phoneNumber
