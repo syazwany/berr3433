@@ -670,6 +670,7 @@ app.post('/security/login', async (req, res) => {
 app.get('/security/retrieve-contact/:passIdentifier', verifyToken, async (req, res) => {
     try {
         // Check if the user has security role
+        const decodedToken = req.decoded;
         if (req.decoded.role !== 'security') {
             res.status(401).json({ message: 'Unauthorized - Requires security role' });
             return;
@@ -701,15 +702,15 @@ app.get('/security/retrieve-contact/:passIdentifier', verifyToken, async (req, r
 // Public API for security to create a new host account with security approval
 /**
  * @swagger
- * /create/host:
+ *  /create/host:
  *   post:
- *     summary: Create a new host account with security approval
+ *     summary: Create a new host
  *     tags:
- *       - Host
+ *       - Hosts
+ *     description: Create a new host account with security approval.
  *     security:
- *       - bearerAuth: []  # Use the 'bearerAuth' security scheme for authentication
+ *       - bearerAuth: []
  *     requestBody:
- *       description: Host details for account creation
  *       required: true
  *       content:
  *         application/json:
@@ -724,14 +725,8 @@ app.get('/security/retrieve-contact/:passIdentifier', verifyToken, async (req, r
  *                 type: string
  *               email:
  *                 type: string
- *               phoneNumber
- *                  type: string
- *             required:
- *               - name
- *               - username
- *               - password
- *               - email
- *               - phoneNumber
+ *               phoneNumber:
+ *                 type: string
  *     responses:
  *       '201':
  *         description: Host account created successfully
@@ -752,7 +747,7 @@ app.get('/security/retrieve-contact/:passIdentifier', verifyToken, async (req, r
  *             example:
  *               message: Host already exists
  *       '500':
- *         description: An error occurred during account creation
+ *         description: An error occurred
  *         content:
  *           application/json:
  *             example:
@@ -761,6 +756,7 @@ app.get('/security/retrieve-contact/:passIdentifier', verifyToken, async (req, r
 app.post('/create/host', verifyToken, async (req, res) => {
     try {
         // Check if the user has security role
+        const decodedToken = req.decoded;
         if (req.decoded.role !== 'security') {
             res.status(401).json({ message: 'Unauthorized - Requires security role' });
             return;
@@ -785,7 +781,7 @@ app.post('/create/host', verifyToken, async (req, res) => {
             username,
             password: hashedPassword,
             email,
-            phoneNUmber
+            phoneNumber
         });
 
         res.status(201).json({ message: 'Host account created successfully' });
@@ -794,6 +790,7 @@ app.post('/create/host', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
 
 // Public API for host login and token generation
 /**
@@ -1098,6 +1095,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 app.get('/visitor/pass', async (req, res) => {
     try {
       // Check if the user has visitor role
+      const decodedToken = req.decoded;
       if (req.decoded.role !== 'visitor') {
         res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
         return;
