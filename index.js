@@ -1085,7 +1085,7 @@ app.post('/create/test/host', async (req, res) => {
 app.get('/host/visitors', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
-        const decodedToken = req.decoded;
+        //const decodedToken = req.decoded;
         if (req.decoded.role !== 'host') {
             res.status(401).json({ message: 'Unauthorized - Requires host role' });
             return;
