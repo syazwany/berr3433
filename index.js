@@ -479,6 +479,77 @@ app.post('/register-security', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ *  /security/login:
+ *   post:
+ *     summary: Security login
+ *     tags:
+ *       - Security
+ *     description: Log in as a security entity and generate a JWT token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Login successful, token generated
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Login successful
+ *               token: <generated_token>
+ *       '401':
+ *         description: Invalid username or password
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Invalid username or password
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ */
+app.post('/security/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Find the security user in the "security" collection
+        const securityUser = await db.collection('security').findOne({ username });
+
+        if (!securityUser) {
+            res.status(401).json({ message: 'Invalid username or password' });
+            return;
+        }
+
+        // Compare the password
+        const isPasswordMatch = await bcrypt.compare(password, securityUser.password);
+
+        if (!isPasswordMatch) {
+            res.status(401).json({ message: 'Invalid username or password' });
+            return;
+        }
+
+        // Generate a JSON Web Token (JWT) for the security
+        const token = jwt.sign({ role: 'security', username: securityUser.username }, 'secretKey');
+        console.log('Generated Token:', token);
+        res.status(200).json({ message: 'Login successful', token });
+    } catch (error) {
+        console.error('Security Login error:', error);
+        res.status(500).json({ message: 'An error occurred during login' });
+    }
+});
+
+
 // View access info for a visitor
 /**
  * @swagger
@@ -1104,68 +1175,64 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
 // Public API for authenticated host to issue visitor pass
 /**
  * @swagger
- * /host/issue-pass:
- *   post:
- *     summary: Issue a visitor pass.
- *     description: Allows an authenticated host to issue a visitor pass.
+ * /visitor/pass:
+ *   get:
+ *     summary: Retrieve visitor pass.
+ *     description: Allows an authenticated visitor to retrieve their pass.
  *     tags:
- *       - Host
+ *       - Visitor
  *     security:
  *       - bearerAuth: []  # Use the same security scheme as defined in the swagger definition
- *     requestBody:
- *       description: Visitor pass details
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Name of the visitor.
- *               email:
- *                 type: string
- *                 description: Email of the visitor.
- *               purpose:
- *                 type: string
- *                 description: Purpose of the visit.
- *             required:
- *               - name
- *               - email
- *               - purpose
  *     responses:
- *       201:
- *         description: Visitor pass issued successfully.
+ *       200:
+ *         description: Visitor pass retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 HostUsername:
+ *                   type: string
+ *                   description: Username of the hosting host.
+ *                 name:
+ *                   type: string
+ *                   description: Name of the visitor.
+ *                 email:
+ *                   type: string
+ *                   description: Email of the visitor.
+ *                 purpose:
+ *                   type: string
+ *                   description: Purpose of the visit.
  *       401:
- *         description: Unauthorized - Requires host role.
+ *         description: Unauthorized - Requires visitor role.
+ *       404:
+ *         description: Pass not found.
  *       500:
  *         description: An error occurred.
  */
-app.post('/host/issue-pass', verifyToken, async (req, res) => {
+app.get('/visitor/pass', verifyToken, async (req, res) => {
     try {
-        // Check if the user has host role
-        const decodedToken = req.decoded;
-        if (req.decoded.role !== 'host') {
-            res.status(401).json({ message: 'Unauthorized - Requires host role' });
+        // Check if the user has visitor role
+        if (req.decoded.role !== 'visitor') {
+            res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
             return;
         }
 
-        const { name, email, purpose } = req.body;
+        // Retrieve the pass for the authenticated visitor from the "visitors" collection
+        const pass = await db.collection('visitors').findOne({ HostUsername: req.decoded.username });
 
-        // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
-        await db.collection('visitors').insertOne({
-            HostUsername: req.decoded.username,
-            name,
-            email,
-            purpose,
-        });
+        if (!pass) {
+            res.status(404).json({ message: 'Pass not found' });
+            return;
+        }
 
-        res.status(201).json({ message: 'Visitor pass issued successfully' });
+        res.status(200).json(pass);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
 
      
   // Public API for visitor to retrieve the pass
