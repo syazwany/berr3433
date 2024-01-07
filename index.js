@@ -1092,7 +1092,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
         }
 
         // Retrieve all visitors for the authenticated host from the "visitors" collection
-       const visitors = await db.collection('visitors').find({ username: req.decoded.username }).toArray();
+       const visitors = await db.collection('visitors').find({ HostUsername: req.decoded.username }).toArray();
         res.status(200).json(visitors);
     } catch (error) {
         console.error(error);
@@ -1177,8 +1177,6 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  *     description: Allows an authenticated visitor to retrieve their pass.
  *     tags:
  *       - Visitor
- *     security:
- *       - bearerAuth: []  # Use the same security scheme as defined in the swagger definition
  *     responses:
  *       200:
  *         description: Pass retrieved successfully
