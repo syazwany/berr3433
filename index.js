@@ -1531,6 +1531,8 @@ app.patch('/admin/manage-roles', verifyToken, async (req, res) => {
  *     summary: Dump all host data upon successful login
  *     tags:
  *       - Admin
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       description: Administrator login details
  *       required: true
@@ -1571,13 +1573,17 @@ app.patch('/admin/manage-roles', verifyToken, async (req, res) => {
  *             example:
  *               message: An error occurred during login
  */
-app.post('/admin/login', async (req, res) => {
+app.post('/admin/login', verifyToken, async (req, res) => {
     try {
         const { username, password } = req.body;
 
         // Find the admin user in the "admins" collection
         const adminUser = await db.collection('admins').findOne({ username });
-
+        // Check if the user has admin role
+       if (req.decoded.role !== 'admin') {
+           res.status(401).json({ message: 'Unauthorized - Requires admin role' });
+            return;
+        }
         if (!adminUser) {
             res.status(401).json({ message: 'Invalid password or admin user not found' });
             return;
