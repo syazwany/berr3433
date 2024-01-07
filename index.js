@@ -1106,62 +1106,68 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  * @swagger
  * /host/issue-pass:
  *   post:
- *     summary: Issue a visitor pass
+ *     summary: Issue a visitor pass.
  *     description: Allows an authenticated host to issue a visitor pass.
  *     tags:
  *       - Host
- *     parameters:
- *       - name: name
- *         in: body
- *         description: Visitor name
- *         required: true
- *         schema:
- *           type: string
- *       - name: email
- *         in: body
- *         description: Visitor email
- *         required: true
- *         schema:
- *           type: string
- *       - name: purpose
- *         in: body
- *         description: Purpose of the visit
- *         required: true
- *         schema:
- *           type: string
+ *     security:
+ *       - bearerAuth: []  # Use the same security scheme as defined in the swagger definition
+ *     requestBody:
+ *       description: Visitor pass details
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Name of the visitor.
+ *               email:
+ *                 type: string
+ *                 description: Email of the visitor.
+ *               purpose:
+ *                 type: string
+ *                 description: Purpose of the visit.
+ *             required:
+ *               - name
+ *               - email
+ *               - purpose
  *     responses:
  *       201:
- *         description: Visitor pass issued successfully
+ *         description: Visitor pass issued successfully.
  *       401:
- *         description: Unauthorized - Requires host role
+ *         description: Unauthorized - Requires host role.
  *       500:
- *         description: An error occurred
+ *         description: An error occurred.
  */
 app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
-      // Check if the user has host role
-      if (req.decoded.role !== 'host') {
-        res.status(401).json({ message: 'Unauthorized - Requires host role' });
-        return;
-      }
-  
-      const { name, email, purpose } = req.body;
-  
-      // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
-      await db.collection('visitors').insertOne({
-        username: req.decoded.username,
-        name,
-        email,
-        purpose,
-      });
-  
-      res.status(201).json({ message: 'Visitor pass issued successfully' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'An error occurred' });
-    }
-  });
+        // Check if the user has host role
+        const decodedToken = req.decoded;
+        if (req.decoded.role !== 'host') {
+            res.status(401).json({ message: 'Unauthorized - Requires host role' });
+            return;
+        }
 
+        const { name, email, purpose } = req.body;
+
+        // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
+        await db.collection('visitors').insertOne({
+            HostUsername: req.decoded.username,
+            name,
+            email,
+            purpose,
+        });
+
+        res.status(201).json({ message: 'Visitor pass issued successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
+});
+
+     
   // Public API for visitor to retrieve the pass
 /**
  * @swagger
@@ -1183,7 +1189,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  *       500:
  *         description: An error occurred
  */
-app.get('/visitor/pass', verifyToken, async (req, res) => {
+app.get('/visitor/pass', async (req, res) => {
     try {
       // Check if the user has visitor role
       if (req.decoded.role !== 'visitor') {
