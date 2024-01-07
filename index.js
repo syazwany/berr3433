@@ -1085,14 +1085,14 @@ app.post('/create/test/host', async (req, res) => {
 app.get('/host/visitors', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
-        //const decodedToken = req.decoded;
+        const decodedToken = req.decoded;
         if (req.decoded.role !== 'host') {
             res.status(401).json({ message: 'Unauthorized - Requires host role' });
             return;
         }
-
+//{ hostUsername: req.decoded.username }
         // Retrieve all visitors for the authenticated host from the "visitors" collection
-        const visitors = await db.collection('visitors').find({ hostUsername: req.decoded.username }).toArray();
+        const visitors = await db.collection('visitors').find().toArray();
         res.status(200).json(visitors);
     } catch (error) {
         console.error(error);
@@ -1131,7 +1131,7 @@ async function retrieveVisitorPass(email) {
 
         return { success: true, pass };
     } catch (error) {
-        console.error(error);
+        console.error('Error retrieving visitor pass:', error);
         return { success: false, error: 'An error occurred' };
     }
 }
