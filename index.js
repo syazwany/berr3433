@@ -849,7 +849,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Compare the password
-        const isPasswordMatch = await bcrypt.compare(password, hostUser.password);
+        const isPasswordMatch = await bcrypt.compare(password, HostUser.password);
 
         if (!isPasswordMatch) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -857,7 +857,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
+        const token = jwt.sign({ role: HostUser.role, username: HostUser.username }, 'secretKey');
         console.log('Generated Token:', token);
         
         res.status(200).json({ message: 'Login successful', token });
