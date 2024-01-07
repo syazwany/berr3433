@@ -123,7 +123,7 @@ app.post('/logout', verifyToken, async (req, res) => {
     }
 });
 
-// Login for user
+// Login for Admin
 /**
  * @swagger
  * /login:
@@ -209,7 +209,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Create a new visitor (requires a valid JWT)
+/* // Create a new visitor (requires a valid JWT)
 /**
  * @swagger
  * /visitors:
@@ -267,8 +267,8 @@ app.post('/login', async (req, res) => {
  *                   type: string
  *             example:
  *               message: An error occurred
- */
-app.post('/visitors', verifyToken, async (req, res) => {
+ */ 
+/*app.post('/visitors', verifyToken, async (req, res) => {
     try {
         const {
             userId,
@@ -296,9 +296,9 @@ app.post('/visitors', verifyToken, async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
-});
+}); */
 
-// Register a new user
+// Register a new Admin
 /**
  * @swagger
  *  /register:
@@ -550,7 +550,7 @@ app.post('/security/login', async (req, res) => {
 });
 
 
-// View access info for a visitor
+/* // View access info for a visitor
 /**
  * @swagger
  * /visitors/{name}/{email}/access:
@@ -596,7 +596,7 @@ app.post('/security/login', async (req, res) => {
  *     message:
  *       type: string
  */
-app.get('/visitors/:name/:email/access', async (req, res) => {
+/* app.get('/visitors/:name/:email/access', async (req, res) => {
     try {
         const {
             name,
@@ -668,7 +668,7 @@ app.get('/visitors/:name/:email/access', async (req, res) => {
  *       message:
  *         type: string
  */
-app.get('/visitors', verifyToken, async (req, res) => {
+/*app.get('/visitors', verifyToken, async (req, res) => {
     try {
         const decodedToken = req.decoded;
         if (decodedToken.role === 'admin') {
@@ -763,7 +763,7 @@ app.get('/visitors', verifyToken, async (req, res) => {
  *                   description: An error occurred
  */
 
-app.patch('/visitors/:userId', verifyToken, async (req, res) => {
+/*app.patch('/visitors/:userId', verifyToken, async (req, res) => {
     try {
         const { userId } = req.params;
         const { name, email, purpose } = req.body;
@@ -845,7 +845,7 @@ app.patch('/visitors/:userId', verifyToken, async (req, res) => {
  *               message: An error occurred
  */
 
-app.delete('/visitors/:userId', verifyToken, async (req, res) => {
+/*app.delete('/visitors/:userId', verifyToken, async (req, res) => {
     try {
         const { userId } = req.params; // Extract the 'id' from req.params
 
@@ -867,7 +867,7 @@ app.delete('/visitors/:userId', verifyToken, async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
-});
+}); */
 
 // Public API for security to create a new host account with security approval
 /**
