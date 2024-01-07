@@ -1101,24 +1101,6 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
     
 });
 
-// Function to issue a visitor pass
-async function issueVisitorPass(username, name, email, purpose) {
-    try {
-        // Insert the visitor into the "visitors" collection
-        await db.collection('visitors').insertOne({
-            username: username,
-            name,
-            email,
-            purpose
-        });
-
-        return { success: true, message: 'Visitor pass issued successfully' };
-    } catch (error) {
-        console.error(error);
-        return { success: false, error: 'Failed to issue visitor pass' };
-    }
-}
-
 // Function to retrieve a visitor pass
 async function retrieveVisitorPass(email) {
     try {
@@ -1140,45 +1122,56 @@ async function retrieveVisitorPass(email) {
 /**
  • @swagger
  • /host/issue-pass:
- •    post:
- •      summary: Issue a visitor pass for an authenticated host
- •      tags:
- •        - Host
- •      security:
- •        - bearerAuth: []
- •      requestBody:
- •        description: Visitor information for issuing a pass
- •        required: true
- •        content:
- •          application/json:
- •            schema:
- •              type: object
- •              properties:
- •                name:
- •                  type: string
- •                email:
- •                  type: string
- •                purpose:
- •                  type: string
- •      responses:
- •        '201':
- •          description: Visitor pass issued successfully
- •          content:
- •            application/json:
- •              example:
- •                message: Visitor pass issued successfully
- •        '401':
- •          description: Unauthorized - Requires host role
- •          content:
- •            application/json:
- •              example:
- •                message: Unauthorized - Requires host role
- •        '500':
- •          description: An error occurred
- •          content:
- •            application/json:
- •              example:
- •                message: An error occurred
+ *   post:
+ *     summary: "Issue a visitor pass"
+ *     description: "Endpoint to issue a visitor pass for authenticated hosts"
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: "name"
+ *         in: "body"
+ *         description: "Visitor's name"
+ *         required: true
+ *         schema:
+ *           type: "string"
+ *       - name: "email"
+ *         in: "body"
+ *         description: "Visitor's email"
+ *         required: true
+ *         schema:
+ *           type: "string"
+ *           format: "email"
+ *       - name: "purpose"
+ *         in: "body"
+ *         description: "Purpose of the visit"
+ *         required: true
+ *         schema:
+ 8           type: "string"
+ *     responses:
+ *       201:
+ *         description: "Visitor pass issued successfully"
+ *         schema:
+ *           type: "object"
+ *           properties:
+ *             message:
+ *               type: "string"
+ *               example: "Visitor pass issued successfully"
+ *       401:
+ *         description: "Unauthorized - Requires host role"
+ *         schema:
+ *           type: "object"
+ *           properties:
+ *             message:
+ *               type: "string"
+ *               example: "Unauthorized - Requires host role"
+ *       500:
+ *         description: "An error occurred"
+ *         schema:
+ *           type: "object"
+ *           properties:
+ *             message:
+ *               type: "string"
+ *               example: "An error occurred"
  */
 app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
@@ -1203,50 +1196,47 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
     }
 });
 
+
 // Public API for retrieving a visitor pass
 /**
  • swagger
  • /visitor/pass:
- •    get:
- •      summary: Retrieve the visitor pass for an authenticated visitor
- •      tags:
- •        - Visitor
- •      security:
- •        - bearerAuth: []
- •      responses:
- •        '200':
- •          description: Visitor pass retrieved successfully
- •          content:
- •            application/json:
- •              schema:
- •                type: object
- •                properties:
- •                  hostUsername:
- •                    type: string
- •                  name:
- •                    type: string
- •                  email:
- •                    type: string
- •                  purpose:
- •                    type: string
- •        '401':
- •          description: Unauthorized - Requires visitor role
- •          content:
- •            application/json:
- •              example:
- •                message: Unauthorized - Requires visitor role
- •        '404':
- •          description: Pass not found
- •          content:
- •            application/json:
- •              example:
- •                message: Pass not found
- •        '500':
- •          description: An error occurred
- •          content:
- •            application/json:
- •              example:
- •                message: An error occurred
+ *   get:
+ *     summary: "Retrieve visitor pass"
+ *     description: "Endpoint to retrieve visitor pass for authenticated visitors"
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: "Visitor pass retrieved successfully"
+ *         schema:
+ *           type: "object"
+ *           properties:
+ *             // Define your response properties here based on the structure of your 'pass' object
+ *       401:
+ *         description: "Unauthorized - Requires visitor role"
+ *         schema:
+ *           type: "object"
+ *           properties:
+ *             message:
+ *               type: "string"
+ *               example: "Unauthorized - Requires visitor role"
+ *       404:
+ *         description: "Visitor pass not found"
+ *         schema:
+ *           type: "object"
+ *           properties:
+ *             message:
+ *               type: "string"
+ *               example: "Visitor pass not found"
+ *       500:
+ *         description: "An error occurred"
+ *         schema:
+ *           type: "object"
+ *           properties:
+ *             message:
+ *               type: "string"
+ *               example: "An error occurred"
  */
 app.get('/visitor/pass', verifyToken, async (req, res) => {
     try {
@@ -1268,6 +1258,25 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
+// Function to issue a visitor pass
+async function issueVisitorPass(username, name, email, purpose) {
+    try {
+        // Insert the visitor into the "visitors" collection
+        await db.collection('visitors').insertOne({
+            username: username,
+            name,
+            email,
+            purpose
+        });
+
+        return { success: true, message: 'Visitor pass issued successfully' };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: 'Failed to issue visitor pass' };
+    }
+}
+
 
 // Additional API to manage account roles by an authenticated administrator
 /**
