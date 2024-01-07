@@ -1089,15 +1089,26 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
         if (req.decoded.role !== 'host') {
             res.status(401).json({ message: 'Unauthorized - Requires host role' });
             return;
+        
+            // If the user is an host, retrieve all visitors from the "visitors" collection
+            const visitors = await db.collection('visitors').find().toArray();
+            res.status(200).json(visitors);
+        } else {
+            // If the user is not an admin, send an unauthorized message
+            res.status(401).json({ message: 'Unauthorized' });
         }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
 //{ hostUsername: req.decoded.username }
         // Retrieve all visitors for the authenticated host from the "visitors" collection
-        const visitors = await db.collection('visitors').find().toArray();
+       /* const visitors = await db.collection('visitors').find().toArray();
         res.status(200).json(visitors);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
-    }   
+    } */  
     
 });
 
