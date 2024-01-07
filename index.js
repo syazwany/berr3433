@@ -841,7 +841,7 @@ app.post('/host/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Find the host user in the "hosts" collection
-        const hostUser = await db.collection('hosts').findOne({ username });
+        const HostUser = await db.collection('hosts').findOne({ username });
 
         if (!hostUser) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
