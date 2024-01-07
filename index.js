@@ -1101,181 +1101,169 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
     
 });
 
-// Function to retrieve a visitor pass
-async function retrieveVisitorPass(email) {
-    try {
-        // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({ email });
-
-        if (!pass) {
-            return { success: false, error: 'Pass not found' };
-        }
-
-        return { success: true, pass };
-    } catch (error) {
-        console.error('Error retrieving visitor pass:', error);
-        return { success: false, error: 'An error occurred' };
-    }
-}
-
-// Public API for issuing a visitor pass
+// Public API for authenticated host to issue visitor pass
 /**
- • @swagger
- • /host/issue-pass:
+ * @swagger
+ * /host/issue-pass:
  *   post:
- *     summary: "Issue a visitor pass"
- *     description: "Endpoint to issue a visitor pass for authenticated hosts"
- *     security:
- *       - bearerAuth: []
+ *     summary: Issue a visitor pass
+ *     description: Allows an authenticated host to issue a visitor pass.
+ *     tags:
+ *       - Host
  *     parameters:
- *       - name: "name"
- *         in: "body"
- *         description: "Visitor's name"
+ *       - name: name
+ *         in: body
+ *         description: Visitor name
  *         required: true
  *         schema:
- *           type: "string"
- *       - name: "email"
- *         in: "body"
- *         description: "Visitor's email"
+ *           type: string
+ *       - name: email
+ *         in: body
+ *         description: Visitor email
  *         required: true
  *         schema:
- *           type: "string"
- *           format: "email"
- *       - name: "purpose"
- *         in: "body"
- *         description: "Purpose of the visit"
+ *           type: string
+ *       - name: purpose
+ *         in: body
+ *         description: Purpose of the visit
  *         required: true
  *         schema:
- 8           type: "string"
+ *           type: string
  *     responses:
  *       201:
- *         description: "Visitor pass issued successfully"
- *         schema:
- *           type: "object"
- *           properties:
- *             message:
- *               type: "string"
- *               example: "Visitor pass issued successfully"
+ *         description: Visitor pass issued successfully
  *       401:
- *         description: "Unauthorized - Requires host role"
- *         schema:
- *           type: "object"
- *           properties:
- *             message:
- *               type: "string"
- *               example: "Unauthorized - Requires host role"
+ *         description: Unauthorized - Requires host role
  *       500:
- *         description: "An error occurred"
- *         schema:
- *           type: "object"
- *           properties:
- *             message:
- *               type: "string"
- *               example: "An error occurred"
+ *         description: An error occurred
  */
 app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
-        // Check if the user has host role
-        if (req.decoded.role !== 'host') {
-            res.status(401).json({ message: 'Unauthorized - Requires host role' });
-            return;
-        }
-
-        const { name, email, purpose } = req.body;
-
-        const result = await issueVisitorPass(req.decoded.username, name, email, purpose);
-
-        if (result.success) {
-            res.status(201).json({ message: result.message });
-        } else {
-            res.status(500).json({ message: result.error });
-        }
+      // Check if the user has host role
+      if (req.decoded.role !== 'host') {
+        res.status(401).json({ message: 'Unauthorized - Requires host role' });
+        return;
+      }
+  
+      const { name, email, purpose } = req.body;
+  
+      // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
+      await db.collection('visitors').insertOne({
+        username: req.decoded.username,
+        name,
+        email,
+        purpose,
+      });
+  
+      res.status(201).json({ message: 'Visitor pass issued successfully' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+      console.error(error);
+      res.status(500).json({ message: 'An error occurred' });
     }
-});
+  });
 
-
-// Public API for retrieving a visitor pass
+  // Public API for visitor to retrieve the pass
 /**
- • swagger
- • /visitor/pass:
+ * @swagger
+ * /visitor/pass:
  *   get:
- *     summary: "Retrieve visitor pass"
- *     description: "Endpoint to retrieve visitor pass for authenticated visitors"
+ *     summary: Retrieve the pass for the authenticated visitor
+ *     description: Allows an authenticated visitor to retrieve their pass.
+ *     tags:
+ *       - Visitor
  *     security:
- *       - bearerAuth: []
+ *       - bearerAuth: []  # Use the same security scheme as defined in the swagger definition
  *     responses:
  *       200:
- *         description: "Visitor pass retrieved successfully"
- *         schema:
- *           type: "object"
- *           properties:
- *             // Define your response properties here based on the structure of your 'pass' object
+ *         description: Pass retrieved successfully
  *       401:
- *         description: "Unauthorized - Requires visitor role"
- *         schema:
- *           type: "object"
- *           properties:
- *             message:
- *               type: "string"
- *               example: "Unauthorized - Requires visitor role"
+ *         description: Unauthorized - Requires visitor role
  *       404:
- *         description: "Visitor pass not found"
- *         schema:
- *           type: "object"
- *           properties:
- *             message:
- *               type: "string"
- *               example: "Visitor pass not found"
+ *         description: Pass not found
  *       500:
- *         description: "An error occurred"
- *         schema:
- *           type: "object"
- *           properties:
- *             message:
- *               type: "string"
- *               example: "An error occurred"
+ *         description: An error occurred
  */
 app.get('/visitor/pass', verifyToken, async (req, res) => {
     try {
-        // Check if the user has visitor role
-        if (req.decoded.role !== 'visitor') {
-            res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
+      // Check if the user has visitor role
+      if (req.decoded.role !== 'visitor') {
+        res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
+        return;
+      }
+  
+      // Retrieve the pass for the authenticated visitor from the "visitors" collection
+      const pass = await db.collection('visitors').findOne({ email: req.decoded.email });
+  
+      if (!pass) {
+        res.status(404).json({ message: 'Pass not found' });
+        return;
+      }
+  
+      res.status(200).json(pass);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'An error occurred' });
+    }
+  });
+
+// Public API for authenticated security to retrieve the contact number of the host
+/**
+ * @swagger
+ * /security/retrieve-contact/{passIdentifier}:
+ *   get:
+ *     summary: Retrieve the contact information of the host.
+ *     description: Allows an authenticated security personnel to retrieve the contact information of the host from a visitor pass.
+ *     tags:
+ *       - Security
+ *     security:
+ *       - bearerAuth: []  # Use the same security scheme as defined in the swagger definition
+ *     parameters:
+ *       - in: path
+ *         name: passIdentifier
+ *         required: true
+ *         description: The identifier of the visitor pass.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Host contact information retrieved successfully
+ *       401:
+ *         description: Unauthorized - Requires security role
+ *       404:
+ *         description: Visitor pass not found
+ *       500:
+ *         description: An error occurred
+ */
+app.get('/security/retrieve-contact/:passIdentifier', verifyToken, async (req, res) => {
+    try {
+        // Check if the user has security role
+        if (req.decoded.role !== 'security') {
+            res.status(401).json({ message: 'Unauthorized - Requires security role' });
             return;
         }
 
-        const result = await retrieveVisitorPass(req.decoded.email);
+        const passIdentifier = req.params.passIdentifier;
 
-        if (result.success) {
-            res.status(200).json(result.pass);
-        } else {
-            res.status(404).json({ message: result.error });
+        // Query the database using passIdentifier to retrieve host contact info from the visitor pass
+        const visitorPass = await db.collection('visitors').findOne({ passIdentifier });
+
+        if (!visitorPass) {
+            res.status(404).json({ message: 'Visitor pass not found' });
+            return;
         }
+
+        // Return only the host's contact information to the public
+        const hostContact = {
+            name: visitorPass.hostUsername,
+            // Add more host contact information fields as needed
+        };
+
+        res.status(200).json(hostContact);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
 });
-
-// Function to issue a visitor pass
-async function issueVisitorPass(username, name, email, purpose) {
-    try {
-        // Insert the visitor into the "visitors" collection
-        await db.collection('visitors').insertOne({
-            username: username,
-            name,
-            email,
-            purpose
-        });
-
-        return { success: true, message: 'Visitor pass issued successfully' };
-    } catch (error) {
-        console.error(error);
-        return { success: false, error: 'Failed to issue visitor pass' };
-    }
-}
 
 
 // Additional API to manage account roles by an authenticated administrator
