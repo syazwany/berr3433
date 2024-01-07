@@ -1232,8 +1232,6 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
-
-
      
   // Public API for visitor to retrieve the pass
 /**
