@@ -1106,7 +1106,7 @@ async function issueVisitorPass(username, name, email, purpose) {
     try {
         // Insert the visitor into the "visitors" collection
         await db.collection('visitors').insertOne({
-            hostUsername: username,
+            username: username,
             name,
             email,
             purpose
