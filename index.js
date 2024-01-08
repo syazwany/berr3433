@@ -893,7 +893,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: hostUser.role, HostUsername: hostUser.username }, 'secretKey');
+        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
         console.log('Generated Token:', token);
         
         res.status(200).json({ message: 'Login successful', token });
