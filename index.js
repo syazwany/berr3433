@@ -646,7 +646,7 @@ app.post('/security/login', async (req, res) => {
  *   get:
  *     summary: Retrieve host contact number
  *     tags:
- *       - security
+ *       - Security
  *     parameters:
  *       - name: passId
  *         in: path
@@ -696,6 +696,7 @@ app.post('/security/login', async (req, res) => {
 app.get('/security/host-contact/:passId', verifyToken, async (req, res) => {
     try {
         // Check if the user has a security role
+        const decodedToken = req.decoded;
         if (req.decoded.role !== 'security') {
             res.status(401).json({ message: 'Unauthorized - Requires security role' });
             return;
@@ -712,13 +713,13 @@ app.get('/security/host-contact/:passId', verifyToken, async (req, res) => {
         }
 
         // Ensure that the request is made by the host who issued the pass
-        if (pass.HostUsername !== req.decoded.username) {
+        if (pass.username !== req.decoded.username) {
             res.status(403).json({ message: 'Unauthorized - You are not the host who issued the pass' });
             return;
         }
 
         // Return host contact number or any other host information
-        const hostContact = await getHostContactNumber(pass.HostUsername);
+        const hostContact = await getHostContactNumber(pass.username);
         
         res.status(200).json({ hostContact });
     } catch (error) {
