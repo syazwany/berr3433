@@ -1124,8 +1124,8 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
         
         // Generate a JSON Web Token (JWT)
-        //const token = jwt.sign({ role: visitorUser.role, username: visitorUser.username }, 'secretKey');
-        const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
+        const token = jwt.sign({ role: visitorUser.role, username: visitorUser.username }, 'secretKey');
+        //const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(201).json({ message: 'Visitor pass issued successfully' , token });
        
