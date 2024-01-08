@@ -801,7 +801,7 @@ app.post('/create/host', verifyToken, async (req, res) => {
         const { name, username, password, email, phoneNumber } = req.body;
 
         // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({ HostUsername });
+        const existingHost = await db.collection('hosts').findOne({ username });
 
         if (existingHost) {
             res.status(409).json({ message: 'Host already exists' });
@@ -877,7 +877,7 @@ app.post('/host/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Find the host user in the "hosts" collection
-        const hostUser = await db.collection('hosts').findOne({ HostUsername });
+        const hostUser = await db.collection('hosts').findOne({ username });
 
         if (!hostUser) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -893,7 +893,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: hostUser.role, HostUsername: hostUser.username }, 'secretKey');
+        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
         console.log('Generated Token:', token);
         
         res.status(200).json({ message: 'Login successful', token });
@@ -960,7 +960,7 @@ app.post('/create/test/host', async (req, res) => {
         const { name, username, password, email, phoneNumber } = req.body;
 
         // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({ Hostusername });
+        const existingHost = await db.collection('hosts').findOne({ username });
 
         if (existingHost) {
             res.status(409).json({ message: 'Host already exists' });
@@ -1116,7 +1116,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
-            HostUsername: req.decoded.username,
+            username: req.decoded.username,
             Id,
             name,
             email,
@@ -1124,7 +1124,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
         
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: 'visitor', HostUsername: req.decoded.username }, 'secretKey');
+        const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(201).json({ message: 'Visitor pass issued successfully' , token });
        
@@ -1195,7 +1195,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({ HostUsername: req.decoded.username });
+        const pass = await db.collection('visitors').findOne({ username: req.decoded.username });
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
@@ -1203,7 +1203,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Ensure that the request is made by the visitor to whom the pass belongs
-        if (pass.HostUsername !== req.decoded.username) {
+        if (pass.username !== req.decoded.username) {
             res.status(403).json({ message: 'Unauthorized - You are not the owner of this pass' });
             return;
         }
