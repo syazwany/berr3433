@@ -730,7 +730,7 @@ app.get('/security/host-contact/:passId', verifyToken, async (req, res) => {
 // Function to retrieve host contact number (replace with your actual implementation)
 async function getHostContactNumber(HostUsername) {
     // Add your logic to retrieve host contact information from the database
-    const host = await db.collection('hosts').findOne({ username: HostUsername });
+    const host = await db.collection('hosts').findOne({ HostUsername: phoneNumber });
     return host.phoneNumber;
     //return "123-456-7890"; // Replace with actual implementation
 }
@@ -1195,7 +1195,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({ username: req.decoded.username });
+        const pass = await db.collection('visitors').findOne({ HostUsername: req.decoded.username });
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
