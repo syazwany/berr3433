@@ -893,7 +893,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
+        const token = jwt.sign({ role: hostUser.role, HostUsername: hostUser.username }, 'secretKey');
         console.log('Generated Token:', token);
         
         res.status(200).json({ message: 'Login successful', token });
@@ -1033,7 +1033,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
         }
 
         // Retrieve all visitors for the authenticated host from the "visitors" collection
-       const visitors = await db.collection('visitors').find({ username: req.decoded.username }).toArray();
+       const visitors = await db.collection('visitors').find({ HostUsername: req.decoded.username }).toArray();
         res.status(200).json(visitors);
     } catch (error) {
         console.error(error);
@@ -1116,7 +1116,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
-            hostusername: req.decoded.username,
+            HostUsername: req.decoded.username,
             Id,
             name,
             email,
@@ -1124,7 +1124,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
         
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
+        const token = jwt.sign({ role: 'visitor', HostUsername: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(201).json({ message: 'Visitor pass issued successfully' , token });
        
@@ -1195,7 +1195,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({ username: req.decoded.username });
+        const pass = await db.collection('visitors').findOne({ HostUsername: req.decoded.username });
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
@@ -1203,7 +1203,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Ensure that the request is made by the visitor to whom the pass belongs
-        if (pass.username !== req.decoded.username) {
+        if (pass.HostUsername !== req.decoded.username) {
             res.status(403).json({ message: 'Unauthorized - You are not the owner of this pass' });
             return;
         }
