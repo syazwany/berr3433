@@ -1047,44 +1047,61 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  * @swagger
  * /host/issue-pass:
  *   post:
- *     summary: Issue a visitor pass.
- *     description: Allows an authenticated host to issue a visitor pass.
+ *     summary: Issue a visitor pass
  *     tags:
- *       - Host
+ *       - host
  *     security:
- *       - bearerAuth: []  # Use the same security scheme as defined in the swagger definition
+ *       - bearerAuth: [] # Assuming you are using JWT authentication
  *     requestBody:
- *       description: Visitor pass details
+ *       description: Visitor Pass Information
  *       required: true
  *       content:
- *         application/json:
+ *        application/json:
  *           schema:
  *             type: object
  *             properties:
  *               Id:
  *                 type: string
- *                description: Id of the visitor.
+ *                 description: ID of the visitor
  *               name:
  *                 type: string
- *                 description: Name of the visitor.
+ *                 description: Name of the visitor
  *               email:
  *                 type: string
- *                 description: Email of the visitor.
+ *                 format: email
+ *                 description: Email of the visitor
  *               purpose:
  *                 type: string
- *                 description: Purpose of the visit.
+ *                 description: Purpose of the visit
  *             required:
- *              - Id
+ *               - Id
  *               - name
  *               - email
  *               - purpose
  *     responses:
- *       201:
- *         description: Visitor pass issued successfully.
- *       401:
- *         description: Unauthorized - Requires host role.
- *       500:
- *         description: An error occurred.
+ *       '201':
+ *         description: Visitor pass issued successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Visitor pass issued successfully
+ *       '401':
+ *         description: Unauthorized - Requires host role
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Requires host role
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ * components:
+ *  securitySchemes:
+ *    bearerAuth:
+ *      type: http
+ *      scheme: bearer
  */
 app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
