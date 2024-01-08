@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {MongoClient} = require('mongodb');
+const {MongoClient} = require('mongodb').MongoClient;
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
@@ -1174,8 +1174,10 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
   
       res.status(200).json(pass);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'An error occurred' });
+        console.error('Error in /host/issue-pass:', error);
+        res.status(500).json({ message: 'An error occurred', error: error.message });
+      //console.error(error);
+      //res.status(500).json({ message: 'An error occurred' });
     }
   });
 
