@@ -877,7 +877,7 @@ app.post('/host/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Find the host user in the "hosts" collection
-        const hostUser = await db.collection('hosts').findOne({ username });
+        const hostUser = await db.collection('hosts').findOne({ HostUsername });
 
         if (!hostUser) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -893,7 +893,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
+        const token = jwt.sign({ role: hostUser.role, HostUsername: hostUser.username }, 'secretKey');
         console.log('Generated Token:', token);
         
         res.status(200).json({ message: 'Login successful', token });
@@ -1049,7 +1049,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  *   post:
  *     summary: Issue a visitor pass
  *     tags:
- *       - host
+ *       - Host
  *     security:
  *       - bearerAuth: [] # Assuming you are using JWT authentication
  *     requestBody:
@@ -1124,7 +1124,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
         
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
+        const token = jwt.sign({ role: 'visitor', HostUsername: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(201).json({ message: 'Visitor pass issued successfully' , token });
        
@@ -1142,7 +1142,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  *   get:
  *     summary: Retrieve visitor pass
  *     tags:
- *       - visitor
+ *       - Visitor
  *     security:
  *       - bearerAuth: []  # Assuming you are using JWT authentication
  *     responses:
