@@ -705,7 +705,7 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
         // Return only the host's contact information to the public
         const hostContact = {
             name: visitorPass.HostUsername,
-            phoneNumber: visitorPass.phoneNumber // Add more host contact information fields as needed
+            phoneNumber: visitorPass.phoneNumber
         };
 
         res.status(200).json(hostContact);
@@ -1082,7 +1082,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
-            username: req.decoded.username,
+            HostUsername: req.decoded.username,
             Id,
             name,
             email,
