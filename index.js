@@ -1205,10 +1205,10 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Ensure that the request is made by the host who issued the pass
-        if (pass.HostUsername !== req.decoded.username) {
+        /*if (pass.HostUsername !== req.decoded.username) {
             res.status(403).json({ message: 'Unauthorized - You are not the host who issued the pass' });
             return;
-        }
+        } */
 
         res.status(200).json(pass);
     } catch (error) {
