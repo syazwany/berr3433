@@ -1124,9 +1124,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
         
         // Generate a JSON Web Token (JWT)
-        // 
-        //const token = jwt.sign({ role: visitorUser.role, username: visitorUser.username }, 'secretKey');
-        const token = jwt.sign({ role: visitorUser.role, username: req.decoded.username }, 'secretKey');
+        const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(201).json({ message: 'Visitor pass issued successfully' , token });
        
@@ -1142,45 +1140,80 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  * @swagger
  * /visitor/pass:
  *   get:
- *     summary: Retrieve the pass for the authenticated visitor
- *     description: Allows an authenticated visitor to retrieve their pass.
+ *     summary: Retrieve visitor pass
  *     tags:
- *       - Visitor
+ *       - visitor
+ *     security:
+ *       - bearerAuth: []  # Assuming you are using JWT authentication
  *     responses:
- *       200:
- *         description: Pass retrieved successfully
- *       401:
+ *       '200':
+ *         description: Successful retrieval of visitor pass
+ *         content:
+ *           application/json:
+ *             example:
+ *               Id: "12345"
+ *               name: "John Doe"
+ *               email: "john@example.com"
+ *               purpose: "Meeting"
+ *               HostUsername: "host123"
+ *       '401':
  *         description: Unauthorized - Requires visitor role
- *       404:
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Requires visitor role
+ *       '403':
+ *         description: Unauthorized - You are not the host who issued the pass
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - You are not the host who issued the pass
+ *       '404':
  *         description: Pass not found
- *       500:
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Pass not found
+ *       '500':
  *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ * components:
+ *  securitySchemes:
+ *    bearerAuth:
+ *      type: http
+ *      scheme: bearer
  */
 app.get('/visitor/pass', verifyToken, async (req, res) => {
     try {
-      // Check if the user has visitor role
-      const decodedToken = req.decoded;
-      if (req.decoded.role !== 'visitor') {
-        res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
-        return;
-      } 
-  
-      // Retrieve the pass for the authenticated visitor from the "visitors" collection
-      const pass = await db.collection('visitors').findOne({ email: req.decoded.email });
-  
-      if (!pass) {
-        res.status(404).json({ message: 'Pass not found' });
-        return;
-      }
-  
-      res.status(200).json(pass);
+        // Check if the user has a visitor role
+        if (req.decoded.role !== 'visitor') {
+            res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
+            return;
+        }
+
+        // Retrieve the pass for the authenticated visitor from the "visitors" collection
+        const pass = await db.collection('visitors').findOne({ email: req.decoded.email });
+
+        if (!pass) {
+            res.status(404).json({ message: 'Pass not found' });
+            return;
+        }
+
+        // Ensure that the request is made by the host who issued the pass
+        if (pass.HostUsername !== req.decoded.username) {
+            res.status(403).json({ message: 'Unauthorized - You are not the host who issued the pass' });
+            return;
+        }
+
+        res.status(200).json(pass);
     } catch (error) {
-        console.error('Error in /host/issue-pass:', error);
-        res.status(500).json({ message: 'An error occurred', error: error.message });
-      //console.error(error);
-      //res.status(500).json({ message: 'An error occurred' });
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
     }
-  });
+});
 
 //Start the server
 try {
