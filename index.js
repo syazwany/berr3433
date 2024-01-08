@@ -742,7 +742,7 @@ app.get('/security/get-host-contact/:visitorId', verifyToken, async (req, res) =
  *   post:
  *     summary: Create a new host
  *     tags:
- *       - Hosts
+ *       - Host
  *     description: Create a new host account with security approval.
  *     security:
  *       - bearerAuth: []
