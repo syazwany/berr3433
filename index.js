@@ -973,7 +973,7 @@ app.post('/create/test/host', async (req, res) => {
         // Insert the host into the "hosts" collection
         await db.collection('hosts').insertOne({
             name,
-            HostUsername,
+            username,
             password: hashedPassword,
             email,
             phoneNumber
@@ -1033,7 +1033,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
         }
 
         // Retrieve all visitors for the authenticated host from the "visitors" collection
-       const visitors = await db.collection('visitors').find({ HostUsername: req.decoded.username }).toArray();
+       const visitors = await db.collection('visitors').find({ username: req.decoded.username }).toArray();
         res.status(200).json(visitors);
     } catch (error) {
         console.error(error);
@@ -1099,7 +1099,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
-            HostUsername: req.decoded.username,
+            username: req.decoded.username,
             Id,
             name,
             email,
