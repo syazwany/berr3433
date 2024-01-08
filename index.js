@@ -1082,7 +1082,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
-            HostUsername: req.decoded.username,
+            username: req.decoded.username,
             Id,
             name,
             email,
