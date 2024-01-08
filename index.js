@@ -1194,9 +1194,10 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
             res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
             return;
         }
-
+//{ email: req.decoded.email }
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({ Id: req.decoded.id });
+        const pass = await db.collection('visitors').findOne();
+
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
