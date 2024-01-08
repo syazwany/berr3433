@@ -1124,7 +1124,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
         
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: 'visitor', HostUsername: req.decoded.username }, 'secretKey');
+        const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(201).json({ message: 'Visitor pass issued successfully' , token });
        
@@ -1195,7 +1195,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({ HostUsername: req.decoded.username });
+        const pass = await db.collection('visitors').findOne({ email: req.decoded.email });
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
