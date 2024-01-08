@@ -973,7 +973,7 @@ app.post('/create/test/host', async (req, res) => {
         // Insert the host into the "hosts" collection
         await db.collection('hosts').insertOne({
             name,
-            username,
+            HostUsername,
             password: hashedPassword,
             email,
             phoneNumber
@@ -1107,7 +1107,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
         // Generate a JSON Web Token (JWT)
         const token = jwt.sign({ role: visitorUser.role, username: visitorUser.username }, 'secretKey');
-
+        console.log('Generated Token:', token);
         res.status(201).json({ message: 'Visitor pass issued successfully' });
     } catch (error) {
         console.error(error);
