@@ -1123,8 +1123,8 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
             purpose,
         });
         // Generate a JSON Web Token (JWT)
-        //const token = jwt.sign({ role: visitorUser.role, username: visitorUser.username }, 'secretKey');
-        //console.log('Generated Token:', token);
+        const token = jwt.sign({ role: visitorUser.role, username: visitorUser.username }, 'secretKey');
+        console.log('Generated Token:', token);
         res.status(201).json({ message: 'Visitor pass issued successfully' });
     } catch (error) {
         console.error(error);
@@ -1152,7 +1152,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  *       500:
  *         description: An error occurred
  */
-app.get('/visitor/pass', async (req, res) => {
+app.get('/visitor/pass', verifyToken, async (req, res) => {
     try {
       // Check if the user has visitor role
       const decodedToken = req.decoded;
