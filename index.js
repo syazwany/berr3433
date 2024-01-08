@@ -873,7 +873,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
+        const token = jwt.sign({ role: hostUser.role, HostUsername: hostUser.username }, 'secretKey');
         console.log('Generated Token:', token);
         
         res.status(200).json({ message: 'Login successful', token });
@@ -1144,6 +1144,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
     try {
         // Check if the user has visitor role
+        const decodedToken = req.decoded;
         if (req.decoded.role !== 'visitor') {
             res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
             return;
@@ -1151,12 +1152,7 @@ app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
         const pass = await db.collection('visitors').findOne({
-            HostUsername: req.decoded.username,
-            Id,
-            name,
-            email,
-            purpose,
-        });
+            HostUsername: req.decoded.username, Id, name, email, purpose, });
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
