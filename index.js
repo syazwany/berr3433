@@ -857,7 +857,7 @@ app.post('/host/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Find the host user in the "hosts" collection
-        const hostUser = await db.collection('hosts').findOne({ username });
+        const hostUser = await db.collection('hosts').findOne({ HostUsername });
 
         if (!hostUser) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -1151,7 +1151,7 @@ app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne();
+        const pass = await db.collection('visitors').findOne({ HostUsername: req.decoded.username});
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
