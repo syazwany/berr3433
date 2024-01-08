@@ -722,7 +722,7 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
  *   post:
  *     summary: Create a new host
  *     tags:
- *       - Hosts
+ *       - Host
  *     description: Create a new host account with security approval.
  *     security:
  *       - bearerAuth: []
@@ -1090,7 +1090,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
 
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
+        const token = jwt.sign({ role: 'visitor', HostUsername: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
 
         res.status(201).json({ message: 'Visitor pass issued successfully', token });
