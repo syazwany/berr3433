@@ -1043,7 +1043,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
 });
 
 // Public API for authenticated host to issue visitor pass
-/**
+ /**
  * @swagger
  * /host/issue-pass:
  *   post:
