@@ -1194,7 +1194,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({ email: req.decoded.email });
+        const pass = await db.collection('visitors').findOne({ HostUsername: req.decoded.username });
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
