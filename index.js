@@ -1203,7 +1203,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Ensure that the request is made by the visitor to whom the pass belongs
-        if (pass.email !== req.decoded.username) {
+        if (pass.HostUsername !== req.decoded.username) {
             res.status(403).json({ message: 'Unauthorized - You are not the owner of this pass' });
             return;
         }
