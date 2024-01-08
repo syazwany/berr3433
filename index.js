@@ -1195,7 +1195,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({ HostUsername: req.decoded.username });
+        const pass = await db.collection('visitors').findOne({ username: req.decoded.username });
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
@@ -1203,7 +1203,7 @@ app.get('/visitor/pass', verifyToken, async (req, res) => {
         }
 
         // Ensure that the request is made by the visitor to whom the pass belongs
-        if (pass.HostUsername !== req.decoded.username) {
+        if (pass.username !== req.decoded.username) {
             res.status(403).json({ message: 'Unauthorized - You are not the owner of this pass' });
             return;
         }
