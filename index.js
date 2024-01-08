@@ -877,7 +877,7 @@ app.post('/host/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Find the host user in the "hosts" collection
-        const hostUser = await db.collection('hosts').findOne({ HostUsername });
+        const hostUser = await db.collection('hosts').findOne({ username });
 
         if (!hostUser) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -893,7 +893,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: hostUser.role, HostUsername: hostUser.username }, 'secretKey');
+        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
         console.log('Generated Token:', token);
         
         res.status(200).json({ message: 'Login successful', token });
@@ -1033,7 +1033,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
         }
 
         // Retrieve all visitors for the authenticated host from the "visitors" collection
-       const visitors = await db.collection('visitors').find({ HostUsername: req.decoded.username }).toArray();
+       const visitors = await db.collection('visitors').find({ username: req.decoded.username }).toArray();
         res.status(200).json(visitors);
     } catch (error) {
         console.error(error);
@@ -1116,7 +1116,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
-            HostUsername: req.decoded.username,
+            hostusername: req.decoded.username,
             Id,
             name,
             email,
@@ -1124,7 +1124,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
         
         // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: 'visitor', HostUsername: req.decoded.username }, 'secretKey');
+        const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
         res.status(201).json({ message: 'Visitor pass issued successfully' , token });
        
