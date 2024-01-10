@@ -1074,7 +1074,6 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
 app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
-        const decodedToken = req.decoded;
         if (req.decoded.role !== 'host') {
             res.status(401).json({ message: 'Unauthorized - Requires host role' });
             return;
@@ -1091,8 +1090,8 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
             purpose,
         });
 
-        // Generate a JSON Web Token (JWT)
-        const token = jwt.sign({ role: 'visitor', HostUsername: req.decoded.username }, 'secretKey');
+        // Generate a JSON Web Token (JWT) with host's role
+        const token = jwt.sign({ role: req.decoded.role, HostUsername: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
 
         res.status(201).json({ message: 'Visitor pass issued successfully', token });
@@ -1101,6 +1100,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
  
 // Public API for visitor to retrieve their pass
 /**
