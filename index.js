@@ -1006,7 +1006,7 @@ app.post('/create/test/host', async (req, res) => {
 app.get('/host/visitors', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
-        const decodedToken = req.decoded;
+        //const decodedToken = req.decoded;
         if (req.decoded.role !== 'host') {
             res.status(401).json({ message: 'Unauthorized - Requires host role' });
             return;
@@ -1072,7 +1072,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
 app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
-        const decodedToken = req.decoded;
+        //const decodedToken = req.decoded;
         if (req.decoded.role !== 'host') {
             res.status(401).json({ message: 'Unauthorized - Requires host role' });
             return;
@@ -1144,7 +1144,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
     try {
         // Check if the user has visitor role
-        const decodedToken = req.decoded;
+        //const decodedToken = req.decoded;
         if (req.decoded.role !== 'visitor') {
             res.status(401).json({ message: 'Unauthorized - Requires visitor role' });
             return;
