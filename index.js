@@ -639,6 +639,7 @@ app.post('/security/login', async (req, res) => {
     }
 });
 
+// Public API for authenticated security to retrieve host contact number from visitor pass
 /**
  * @swagger
  *  /security/retrieve-contact/{visitorId}:
@@ -701,10 +702,10 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
             return;
         }
 
-        // Return the host's contact information to the public
+        // Return only the host's contact information to the public
         const hostContact = {
             name: visitorPass.HostUsername,
-            phoneNumber: visitorPass.phoneNumber // Make sure this property name is correct
+            phoneNumber: visitorPass.phoneNumber
         };
 
         res.status(200).json(hostContact);
@@ -713,7 +714,6 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
         res.status(500).json({ message: 'An error occurred' });
     }
 });
-
 
 // Public API for security to create a new host account with security approval
 /**
