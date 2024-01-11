@@ -644,33 +644,48 @@ app.post('/security/login', async (req, res) => {
 /**
  * @swagger
  * /security/retrieve-contact/{visitorId}:
- *    get:
- *      summary: Retrieve host contact information
- *       tags: 
- *          - Security
- *       parameters:
- *         - in: path
- *           name: visitorId
- *           schema:
- *             type: string
- *           required: true
- *           description: The ID of the visitor
- *       security:
- *         - bearerAuth: []
- *       responses:
- *         '200':
- *           description: Successful response
- *           content:
- *             application/json:
- *               example:
- *                 name: John Doe
- *                 phoneNumber: '+1234567890'
- *         '401':
- *           description: Unauthorized - Requires security role
- *         '404':
- *           description: Visitor pass not found
- *         '500':
- *           description: An error occurred
+ *   get:
+ *     summary: Retrieve host contact information for a visitor
+ *     parameters:
+ *       - name: visitorId
+ *         in: path
+ *         required: true
+ *         description: ID of the visitor
+ *         schema:
+ *           type: string
+ *     security:
+ *       - JWT: []
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               name: John Doe
+ *               phoneNumber: +1234567890
+ *       '401':
+ *         description: Unauthorized - Requires security role
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Unauthorized - Requires security role
+ *       '404':
+ *         description: Visitor pass not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Visitor pass not found
+ *       '500':
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: An error occurred
+ * components:
+ *  securitySchemes:
+ *    JWT:
+ *     type: http
+ *     scheme: bearer
  */
 app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) => {
     try {
@@ -695,7 +710,7 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
 
         // Return only the host's contact information to the public
         const hostContact = {
-            name: visitorPass.HostUsername,
+            name: visitorPass.username,
             phoneNumber: visitorPass.phoneNumber
         };
 
