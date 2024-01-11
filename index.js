@@ -1093,6 +1093,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
             username: req.decoded.username,
+            phoneNumber: req.decoded.phoneNumber,
             Id,
             name,
             email,
@@ -1162,7 +1163,7 @@ app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({username: req.decoded.username});
+        const pass = await db.collection('visitors').findMany({username: req.decoded.username, phoneNumber:req.decoded.phoneNumber});
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
