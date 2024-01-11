@@ -570,6 +570,7 @@ app.post('/register-security', async (req, res) => {
     }
 });
 
+// login for security
 /**
  * @swagger
  *  /security/login:
@@ -709,10 +710,7 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
 
         // Log the retrieved visitor pass for debugging
         console.log('Visitor Pass:', visitorPass);
-        // Log specific fields for further analysis (delete if nessacary)
-        console.log('Host Username:', visitorPass.username);
-        console.log('Phone Number:', visitorPass.phoneNumber);
-
+        
 
         // Return only the host's contact information to the public
         const hostContact = {
@@ -726,8 +724,6 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
         res.status(500).json({ message: 'An error occurred' });
     }
 });
-
-
 
 
 // Public API for security to create a new host account with security approval
@@ -1115,7 +1111,6 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 });
 
 
- 
 // Public API for visitor to retrieve their pass
 /**
  * @swagger
