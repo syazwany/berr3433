@@ -555,7 +555,8 @@ app.post('/register-security', async (req, res) => {
                 name,
                 username,
                 password: hashedPassword,
-                email
+                email,
+                role: 'security' //
             });
 
         res.status(201).json({
@@ -642,14 +643,10 @@ app.post('/security/login', async (req, res) => {
 // Public API for authenticated security to retrieve host contact number from visitor pass
 /**
  * @swagger
+ * /security/retrieve-contact/{visitorId}:
  * tags:
  *   name: Security
  *   description: API operations for security
- */
-/**
- * @swagger
- * path:
- *   /security/retrieve-contact/{visitorId}:
  *     get:
  *       summary: Retrieve host contact information
  *       tags: [Security]
