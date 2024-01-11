@@ -772,17 +772,17 @@ app.post('/create/host', verifyToken, async (req, res) => {
             return;
         }
 
-        const { name, HostUsername, password, email, phoneNumber } = req.body;
+        const { name, username, password, email, phoneNumber } = req.body;
 
         // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({ HostUsername });
+        const existingHost = await db.collection('hosts').findOne({ username });
 
         if (existingHost) {
             res.status(409).json({ message: 'Host already exists' });
             return;
         }
         // Log the host username for debugging
-        console.log('HostUsername:', req.decoded.username);
+        //console.log('HostUsername:', req.decoded.username);
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -790,7 +790,7 @@ app.post('/create/host', verifyToken, async (req, res) => {
         // Insert the host into the "hosts" collection
         await db.collection('hosts').insertOne({
             name,
-            HostUsername,
+            username,
             password: hashedPassword,
             email,
             phoneNumber,
@@ -851,10 +851,10 @@ app.post('/create/host', verifyToken, async (req, res) => {
  */
 app.post('/host/login', async (req, res) => {
     try {
-        const { HostUsername, password } = req.body;
+        const { username, password } = req.body;
 
         // Find the host user in the "hosts" collection
-        const hostUser = await db.collection('hosts').findOne({ HostUsername });
+        const hostUser = await db.collection('hosts').findOne({ username });
 
         if (!hostUser) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -870,7 +870,7 @@ app.post('/host/login', async (req, res) => {
         }
 
         // Generate a JSON Web Token (JWT) for the host
-        const token = jwt.sign({ role: hostUser.role, HostUsername: hostUser.username }, 'secretKey');
+        const token = jwt.sign({ role: hostUser.role, username: hostUser.username }, 'secretKey');
         console.log('Generated Token:', token);
         
         res.status(200).json({ message: 'Login successful', token });
@@ -952,7 +952,7 @@ app.post('/create/test/host', async (req, res) => {
         // Insert the host into the "hosts" collection
         await db.collection('hosts').insertOne({
             name,
-            HostUsername,
+            username,
             password: hashedPassword,
             email,
             phoneNumber,
@@ -1013,7 +1013,7 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
         }
 
         // Retrieve all visitors for the authenticated host from the "visitors" collection
-       const visitors = await db.collection('visitors').find({ HostUsername: req.decoded.username }).toArray();
+       const visitors = await db.collection('visitors').find({ username: req.decoded.username }).toArray();
         res.status(200).json(visitors);
     } catch (error) {
         console.error(error);
@@ -1071,11 +1071,11 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         const { Id, name, email, purpose } = req.body;
 
         // Log the host username for debugging
-        console.log('Host Username:', req.decoded.username);
+        //console.log('Host Username:', req.decoded.username);
 
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
-            HostUsername: req.decoded.username,
+            username: req.decoded.username,
             Id,
             name,
             email,
@@ -1083,7 +1083,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         });
 
         // Generate a JSON Web Token (JWT) with visitor role
-        const token = jwt.sign({ role: 'visitor', HostUsername: req.decoded.username }, 'secretKey');
+        const token = jwt.sign({ role: 'visitor', username: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
 
         res.status(201).json({ message: 'Visitor pass issued successfully', token });
@@ -1146,7 +1146,7 @@ app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({HostUsername: req.decoded.username});
+        const pass = await db.collection('visitors').findOne({username: req.decoded.username});
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
