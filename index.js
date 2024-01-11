@@ -709,11 +709,14 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
 
         // Log the retrieved visitor pass for debugging
         console.log('Visitor Pass:', visitorPass);
+        // Log specific fields for further analysis (delete if nessacary)
+        console.log('Host Username:', visitorPass.username);
+        console.log('Phone Number:', visitorPass.phoneNumber);
 
 
         // Return only the host's contact information to the public
         const hostContact = {
-            name: visitorPass.hostUsername,
+            name: visitorPass.username,
             phoneNumber: visitorPass.phoneNumber
         };
 
