@@ -713,7 +713,7 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
 
         // Return only the host's contact information to the public
         const hostContact = {
-            name: visitorPass.username,
+            name: visitorPass.hostUsername,
             phoneNumber: visitorPass.phoneNumber
         };
 
