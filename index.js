@@ -656,7 +656,7 @@ app.post('/security/login', async (req, res) => {
  *         schema:
  *           type: string
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       '200':
  *         description: Successful response
@@ -685,7 +685,7 @@ app.post('/security/login', async (req, res) => {
  *               message: An error occurred
  * components:
  *  securitySchemes:
- *    BearerAuth:
+ *    bearerAuth:
  *      type: http
  *      scheme: bearer
  */
@@ -709,6 +709,7 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
 
         // Log the retrieved visitor pass for debugging
         console.log('Visitor Pass:', visitorPass);
+        console.log('Host Number:', req.decoded.phoneNumber)
 
         // Return only the host's contact information to the public
         const hostContact = {
