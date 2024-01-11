@@ -1022,12 +1022,10 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
 /**
  * @swagger
  * /host/issue-pass:
- * tags:
- *   name: Host
- *   description: API operations for hosts
  *     post:
  *       summary: Issue a visitor pass
- *       tags: [Host]
+ *       tags:
+ *          - Host
  *       security:
  *         - bearerAuth: []
  *       requestBody:
@@ -1058,7 +1056,6 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
  *         '500':
  *           description: An error occurred
  */
-
 app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
