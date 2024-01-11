@@ -646,6 +646,8 @@ app.post('/security/login', async (req, res) => {
  * /security/retrieve-contact/{visitorId}:
  *   get:
  *     summary: Retrieve host contact information for a visitor
+ *     tags:
+ *      - Security
  *     parameters:
  *       - name: visitorId
  *         in: path
@@ -947,10 +949,10 @@ app.post('/host/login', async (req, res) => {
  */
 app.post('/create/test/host', async (req, res) => {
     try {
-        const { name, HostUsername, password, email, phoneNumber } = req.body;
+        const { name, username, password, email, phoneNumber } = req.body;
 
         // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({ HostUsername });
+        const existingHost = await db.collection('hosts').findOne({ username });
 
         if (existingHost) {
             res.status(409).json({ message: 'Host already exists' });
@@ -1113,23 +1115,18 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  * @swagger
  *  /visitor/retrieve-pass:
  *   get:
- *     summary: Retrieve the visitor pass
- *     tags:
- *       - Visitor
- *     description: Retrieve the visitor pass information for the authenticated visitor.
+ *     summary: Retrieve the pass for the authenticated visitor
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       '200':
- *         description: Visitor pass retrieved successfully
+ *         description: Successful response
  *         content:
  *           application/json:
  *             example:
- *               Id: visitorId123
- *               name: VisitorName
- *               email: visitor@example.com
- *               purpose: Meeting
- *               hostUsername: HostUsername
+ *               username: john_doe
+ *               hostName: HostXYZ
+ *               hostphoneNumber: 0123456789
  *       '401':
  *         description: Unauthorized - Requires visitor role
  *         content:
@@ -1148,6 +1145,11 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
  *           application/json:
  *             example:
  *               message: An error occurred
+ * components:
+ *  securitySchemes:
+ *    BearerAuth:
+ *     type: http
+ *      scheme: bearer
  */
 app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
     try {
@@ -1159,12 +1161,19 @@ app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({username: req.decoded.username});
+        const pass = await db.collection('visitors').findOne({ username: req.decoded.username });
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
             return;
         }
+
+        // Assuming there is a reference to the host in the pass (e.g., hostId)
+        const host = await db.collection('hosts').findOne({ _id: pass.hostId });
+
+        // Attach host information to the pass
+        pass.hostName = host.name;
+        pass.hostphoneNumber = host.phoneNumber;
 
         res.status(200).json(pass);
     } catch (error) {
