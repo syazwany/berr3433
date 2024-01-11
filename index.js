@@ -644,12 +644,10 @@ app.post('/security/login', async (req, res) => {
 /**
  * @swagger
  * /security/retrieve-contact/{visitorId}:
- * tags:
- *   name: Security
- *   description: API operations for security
- *     get:
- *       summary: Retrieve host contact information
- *       tags: [Security]
+ *    get:
+ *      summary: Retrieve host contact information
+ *       tags: 
+ *          - Security
  *       parameters:
  *         - in: path
  *           name: visitorId
