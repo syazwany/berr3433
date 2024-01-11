@@ -781,6 +781,8 @@ app.post('/create/host', verifyToken, async (req, res) => {
             res.status(409).json({ message: 'Host already exists' });
             return;
         }
+        // Log the host username for debugging
+        console.log('HostUsername:', req.decoded.username);
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -852,7 +854,7 @@ app.post('/host/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Find the host user in the "hosts" collection
-        const hostUser = await db.collection('hosts').findOne({ HostUsername });
+        const hostUser = await db.collection('hosts').findOne({ username });
 
         if (!hostUser) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -935,12 +937,14 @@ app.post('/create/test/host', async (req, res) => {
         const { name, username, password, email, phoneNumber } = req.body;
 
         // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({ HostUsername });
+        const existingHost = await db.collection('hosts').findOne({ username });
 
         if (existingHost) {
             res.status(409).json({ message: 'Host already exists' });
             return;
         }
+        // Log the host username for debugging
+        console.log('HostUsername:', req.decoded.username);
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
