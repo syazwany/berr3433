@@ -961,7 +961,7 @@ app.post('/create/test/host', async (req, res) => {
             return;
         }
         // Log the host username for debugging
-        console.log('HostUsername:', req.decoded.username);
+       // console.log('username:', req.decoded.username);
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -1093,7 +1093,6 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
             username: req.decoded.username,
-            phoneNumber: req.decoded.phoneNumber,
             Id,
             name,
             email,
@@ -1163,7 +1162,7 @@ app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findMany({username: req.decoded.username, phoneNumber:req.decoded.phoneNumber});
+        const pass = await db.collection('visitors').findMany({username: req.decoded.username});
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
