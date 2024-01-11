@@ -772,10 +772,10 @@ app.post('/create/host', verifyToken, async (req, res) => {
             return;
         }
 
-        const { name, username, password, email, phoneNumber } = req.body;
+        const { name, HostUsername, password, email, phoneNumber } = req.body;
 
         // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({ username });
+        const existingHost = await db.collection('hosts').findOne({ HostUsername });
 
         if (existingHost) {
             res.status(409).json({ message: 'Host already exists' });
@@ -790,7 +790,7 @@ app.post('/create/host', verifyToken, async (req, res) => {
         // Insert the host into the "hosts" collection
         await db.collection('hosts').insertOne({
             name,
-            username,
+            HostUsername,
             password: hashedPassword,
             email,
             phoneNumber,
@@ -851,10 +851,10 @@ app.post('/create/host', verifyToken, async (req, res) => {
  */
 app.post('/host/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { HostUsername, password } = req.body;
 
         // Find the host user in the "hosts" collection
-        const hostUser = await db.collection('hosts').findOne({ username });
+        const hostUser = await db.collection('hosts').findOne({ HostUsername });
 
         if (!hostUser) {
             res.status(401).json({ message: 'Invalid password or host user not found' });
@@ -934,10 +934,10 @@ app.post('/host/login', async (req, res) => {
  */
 app.post('/create/test/host', async (req, res) => {
     try {
-        const { name, username, password, email, phoneNumber } = req.body;
+        const { name, HostUsername, password, email, phoneNumber } = req.body;
 
         // Check if the host already exists
-        const existingHost = await db.collection('hosts').findOne({ username });
+        const existingHost = await db.collection('hosts').findOne({ HostUsername });
 
         if (existingHost) {
             res.status(409).json({ message: 'Host already exists' });
@@ -952,7 +952,7 @@ app.post('/create/test/host', async (req, res) => {
         // Insert the host into the "hosts" collection
         await db.collection('hosts').insertOne({
             name,
-            username,
+            HostUsername,
             password: hashedPassword,
             email,
             phoneNumber,
