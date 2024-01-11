@@ -709,7 +709,7 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
 
         // Log the retrieved visitor pass for debugging
         console.log('Visitor Pass:', visitorPass);
-        console.log('Host Number:', req.decoded.phoneNumber)
+
 
         // Return only the host's contact information to the public
         const hostContact = {
@@ -1164,7 +1164,7 @@ app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({username: req.decoded.username, phoneNumber: req.decoded.phoneNumber});
+        const pass = await db.collection('visitors').findOne({username: req.decoded.username});
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
