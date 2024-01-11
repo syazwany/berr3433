@@ -1075,6 +1075,9 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
 
         const { Id, name, email, purpose } = req.body;
 
+        // Log the host username for debugging
+        console.log('Host Username:', req.decoded.username);
+        
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
             HostUsername: req.decoded.username,
