@@ -642,47 +642,40 @@ app.post('/security/login', async (req, res) => {
 // Public API for authenticated security to retrieve host contact number from visitor pass
 /**
  * @swagger
- *  /security/retrieve-contact/{visitorId}:
- *   get:
- *     summary: Retrieve contact number of the host from the visitor pass
- *     tags:
- *       - Security
- *     description: Retrieve the host contact number based on the visitor pass information.
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: visitorId
- *         schema:
- *           type: string
- *         required: true
- *         description: ID of the visitor pass
- *     responses:
- *       '200':
- *         description: Host contact information retrieved successfully
- *         content:
- *           application/json:
- *             example:
- *               name: HostUsername
- *               phoneNumber: +123456789
- *       '401':
- *         description: Unauthorized - Requires security role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires security role
- *       '404':
- *         description: Visitor pass not found
- *         content:
- *           application/json:
- *             example:
- *               message: Visitor pass not found
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
+ * tags:
+ *   name: Security
+ *   description: API operations for security
+ */
+/**
+ * @swagger
+ * path:
+ *   /security/retrieve-contact/{visitorId}:
+ *     get:
+ *       summary: Retrieve host contact information
+ *       tags: [Security]
+ *       parameters:
+ *         - in: path
+ *           name: visitorId
+ *           schema:
+ *             type: string
+ *           required: true
+ *           description: The ID of the visitor
+ *       security:
+ *         - bearerAuth: []
+ *       responses:
+ *         '200':
+ *           description: Successful response
+ *           content:
+ *             application/json:
+ *               example:
+ *                 name: John Doe
+ *                 phoneNumber: '+1234567890'
+ *         '401':
+ *           description: Unauthorized - Requires security role
+ *         '404':
+ *           description: Visitor pass not found
+ *         '500':
+ *           description: An error occurred
  */
 app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) => {
     try {
@@ -702,6 +695,9 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
             return;
         }
 
+        // Log the retrieved visitor pass for debugging
+        console.log('Visitor Pass:', visitorPass);
+
         // Return only the host's contact information to the public
         const hostContact = {
             name: visitorPass.HostUsername,
@@ -714,6 +710,7 @@ app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) =
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
 
 // Public API for security to create a new host account with security approval
 /**
@@ -1090,8 +1087,8 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
             purpose,
         });
 
-        // Generate a JSON Web Token (JWT) with host's role
-        const token = jwt.sign({ role: req.decoded.role, HostUsername: req.decoded.username }, 'secretKey');
+        // Generate a JSON Web Token (JWT) with visitor role
+        const token = jwt.sign({ role: 'visitor', HostUsername: req.decoded.username }, 'secretKey');
         console.log('Generated Token:', token);
 
         res.status(201).json({ message: 'Visitor pass issued successfully', token });
