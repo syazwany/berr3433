@@ -1021,50 +1021,44 @@ app.get('/host/visitors', verifyToken, async (req, res) => {
 // Public API for authenticated host to issue visitor pass
 /**
  * @swagger
- *  /host/issue-pass:
- *   post:
- *     summary: Issue a visitor pass
- *     tags:
- *       - Host
- *     description: Issue a visitor pass and generate a token.
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               Id:
- *                 type: string
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *               purpose:
- *                 type: string
- *     responses:
- *       '201':
- *         description: Visitor pass issued successfully
+ * /host/issue-pass:
+ * tags:
+ *   name: Host
+ *   description: API operations for hosts
+ *     post:
+ *       summary: Issue a visitor pass
+ *       tags: [Host]
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
  *         content:
  *           application/json:
- *             example:
- *               message: Visitor pass issued successfully
- *               token: <generated_token>
- *       '401':
- *         description: Unauthorized - Requires host role
- *         content:
- *           application/json:
- *             example:
- *               message: Unauthorized - Requires host role
- *       '500':
- *         description: An error occurred
- *         content:
- *           application/json:
- *             example:
- *               message: An error occurred
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 Id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 purpose:
+ *                   type: string
+ *       responses:
+ *         '201':
+ *           description: Successful pass issuance
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Visitor pass issued successfully
+ *                 token: generated_jwt_token
+ *         '401':
+ *           description: Unauthorized - Requires host role
+ *         '500':
+ *           description: An error occurred
  */
+
 app.post('/host/issue-pass', verifyToken, async (req, res) => {
     try {
         // Check if the user has host role
@@ -1076,8 +1070,8 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         const { Id, name, email, purpose } = req.body;
 
         // Log the host username for debugging
-        console.log('Host Username:', req.decoded.username);
-        
+        console.log('HostUsername:', req.decoded.username);
+
         // Issue the visitor pass (store only in the "visitors" collection, no separate visitor account)
         await db.collection('visitors').insertOne({
             HostUsername: req.decoded.username,
@@ -1097,6 +1091,7 @@ app.post('/host/issue-pass', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
 
  
 // Public API for visitor to retrieve their pass
