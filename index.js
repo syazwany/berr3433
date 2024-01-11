@@ -646,8 +646,6 @@ app.post('/security/login', async (req, res) => {
  * /security/retrieve-contact/{visitorId}:
  *   get:
  *     summary: Retrieve host contact information for a visitor
- *     tags:
- *      - Security
  *     parameters:
  *       - name: visitorId
  *         in: path
@@ -656,7 +654,7 @@ app.post('/security/login', async (req, res) => {
  *         schema:
  *           type: string
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       '200':
  *         description: Successful response
@@ -685,9 +683,9 @@ app.post('/security/login', async (req, res) => {
  *               message: An error occurred
  * components:
  *  securitySchemes:
- *   bearerAuth: []
- *     type: http
- *     scheme: bearer
+ *    BearerAuth:
+ *      type: http
+ *      scheme: bearer
  */
 app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) => {
     try {
