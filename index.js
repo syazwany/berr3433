@@ -643,9 +643,11 @@ app.post('/security/login', async (req, res) => {
 // Public API for authenticated security to retrieve host contact number from visitor pass
 /**
  * @swagger
- * /security/retrieve-host-contact/{visitorId}:
+ * /security/retrieve-contact/{visitorId}:
  *   get:
- *     summary: Retrieve host contact information for a visitor (security)
+ *     summary: Retrieve host contact information for a visitor
+ *     tags:
+ *      - Security
  *     parameters:
  *       - name: visitorId
  *         in: path
@@ -654,14 +656,14 @@ app.post('/security/login', async (req, res) => {
  *         schema:
  *           type: string
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       '200':
  *         description: Successful response
  *         content:
  *           application/json:
  *             example:
- *               name: HostXYZ
+ *               name: John Doe
  *               phoneNumber: +1234567890
  *       '401':
  *         description: Unauthorized - Requires security role
@@ -670,11 +672,11 @@ app.post('/security/login', async (req, res) => {
  *             example:
  *               message: Unauthorized - Requires security role
  *       '404':
- *         description: Visitor pass or host not found
+ *         description: Visitor pass not found
  *         content:
  *           application/json:
  *             example:
- *               message: Visitor pass or host not found
+ *               message: Visitor pass not found
  *       '500':
  *         description: An error occurred
  *         content:
@@ -683,11 +685,11 @@ app.post('/security/login', async (req, res) => {
  *               message: An error occurred
  * components:
  *  securitySchemes:
- *    bearerAuth:
+ *    BearerAuth:
  *      type: http
  *      scheme: bearer
  */
-app.get('/security/retrieve-host-contact/:visitorId', verifyToken, async (req, res) => {
+app.get('/security/retrieve-contact/:visitorId', verifyToken, async (req, res) => {
     try {
         // Check if the user has security role
         if (req.decoded.role !== 'security') {
@@ -705,21 +707,13 @@ app.get('/security/retrieve-host-contact/:visitorId', verifyToken, async (req, r
             return;
         }
 
-        // Retrieve host information using the hostId from the visitor pass
-        const host = await db.collection('hosts').findOne({ _id: visitorPass.hostId });
+        // Log the retrieved visitor pass for debugging
+        console.log('Visitor Pass:', visitorPass);
 
-        if (!host) {
-            res.status(404).json({ message: 'Host not found' });
-            return;
-        }
-
-        // Log the retrieved host information for debugging
-        console.log('Host Information:', host);
-
-        // Return the host's contact information to the security personnel
+        // Return only the host's contact information to the public
         const hostContact = {
-            name: host.name,
-            phoneNumber: host.phoneNumber
+            name: visitorPass.username,
+            phoneNumber: visitorPass.phoneNumber
         };
 
         res.status(200).json(hostContact);
@@ -728,6 +722,7 @@ app.get('/security/retrieve-host-contact/:visitorId', verifyToken, async (req, r
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
 
 
 
@@ -1168,7 +1163,7 @@ app.get('/visitor/retrieve-pass', verifyToken, async (req, res) => {
         }
 
         // Retrieve the pass for the authenticated visitor from the "visitors" collection
-        const pass = await db.collection('visitors').findOne({username: req.decoded.username});
+        const pass = await db.collection('visitors').findOne({username: req.decoded.username, phoneNumber: req.decoded.phoneNumber});
 
         if (!pass) {
             res.status(404).json({ message: 'Pass not found' });
