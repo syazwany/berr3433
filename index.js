@@ -646,6 +646,8 @@ app.post('/security/login', async (req, res) => {
  * /security/retrieve-contact/{visitorId}:
  *   get:
  *     summary: Retrieve host contact information for a visitor
+ *     tags:
+ *      - Security
  *     parameters:
  *       - name: visitorId
  *         in: path
