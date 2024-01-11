@@ -214,7 +214,7 @@ app.post('/login', async (req, res) => {
  * @swagger
  *  /register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new admin
  *     tags:
  *        - Admin 
  *     requestBody:
@@ -654,7 +654,7 @@ app.post('/security/login', async (req, res) => {
  *         schema:
  *           type: string
  *     security:
- *       - JWT: []
+ *       - bearerAuth: []
  *     responses:
  *       '200':
  *         description: Successful response
@@ -683,7 +683,7 @@ app.post('/security/login', async (req, res) => {
  *               message: An error occurred
  * components:
  *  securitySchemes:
- *    JWT:
+ *   bearerAuth: []
  *     type: http
  *     scheme: bearer
  */
